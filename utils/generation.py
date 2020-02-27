@@ -78,6 +78,7 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 s = 0.5*tag_spacings[fn]
                 S_en  = (param.R_en-s)/param.R_en
                 theta = 0.5*s/param.R_en
+                param.h = 0.008
                 param.xi = 0.5
                 param.sigma = 1.0
                 param.phi_en = theta         # endocardial torsion
