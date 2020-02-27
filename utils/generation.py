@@ -2,6 +2,8 @@ import os
 
 from PyMRStrain import *
 
+from utils.im_parameters import tag_spacings
+
 
 # Parameters generation
 def generate_phantoms(nb_samples,ini=0,fin=0):
@@ -18,19 +20,6 @@ def generate_phantoms(nb_samples,ini=0,fin=0):
 
         # Create parameters
         p = Parameters(time_steps=5)
-
-        # Motion params estimation
-        s = 0.5*tag_spacings[j]
-        S_en  = (p["R_en"]-s)/p["R_en"]
-        theta = 0.5*s/p["R_en"] 
-
-        # Modify some values
-        p.xi = 0.5
-        p.sigma = 1.0
-        p.phi_en = theta         # endocardial torsion
-        p.phi_ep = 0*np.pi/180   # epicardial torsion
-        p.S_ar = 1.0             # end-systolic area scaling
-        p.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)        
 
         # Create spins
         s = Spins(Nb_samples=nb_samples,parameters=p)
@@ -85,6 +74,17 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 spins = load_pyobject('inputs/spins/spins_{:03d}.pkl'.format(d),sep_proc=True)
                 param = load_pyobject('inputs/parameters/p_{:03d}.pkl'.format(d))
 
+                # Modify some values
+                s = 0.5*tag_spacings[fn]
+                S_en  = (param.R_en-s)/param.R_en
+                theta = 0.5*s/param.R_en
+                param.xi = 0.5
+                param.sigma = 1.0
+                param.phi_en = theta         # endocardial torsion
+                param.phi_ep = 0*np.pi/180   # epicardial torsion
+                param.S_ar = 1.0             # end-systolic area scaling
+                param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)        
+
                 # Create phantom
                 phantom = Phantom(spins, param, patient=patients[d], z_motion=False)
 
@@ -101,16 +101,18 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                         os.mkdir('inputs/noise_free_images')
 
                     # Get images and scale
-                    I = scale_image(kspace.to_img(),mag=False,real=True,compl=True)
+                    sine_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True)
 
                     # Export images
-                    save_pyobject(I,'inputs/noise_free_images/I_{:03d}_{:02d}_{:02d}.pkl'.format(d,fn,rn))
+                    save_pyobject(sine_image,'inputs/noise_free_images/I_{:03d}_{:02d}_{:02d}.pkl'.format(d,fn,rn))
 
                 # Compress kspaces
                 kspace.scale()
 
                 # Get boolean mask
-                mask = mask.to_img() > 0.05
+                mask = mask.to_img() > 2
+
+                multi_slice_viewer(mask[...,0,0,:])
 
                 # Export kspaces and mask
                 save_pyobject(kspace,'inputs/kspaces/I_{:03d}_{:02d}_{:02d}.pkl'.format(d,fn,rn))
