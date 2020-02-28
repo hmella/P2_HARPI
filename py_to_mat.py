@@ -11,22 +11,22 @@ folders = ['inputs/noise_free_images/',
 
 for folder in folders:
     for filename in os.listdir(folder):
+        fname, ext = os.path.splitext(filename)
+        if ext != '.mat':
 
-        # Load image
-        I = load_pyobject(folder+filename)
+            # Load image
+            I = load_pyobject(folder+filename)
 
-        # Rescale images
-        if folder is not 'inputs/masks/': 
-            r = dict()
-            for (key, value) in I.items():
-                r[key] = value['RescaleSlope']*value['Image'] + value['RescaleIntercept']
-            I = r['real'] + 1j*r['complex']
-    
-            # Export matlab object
-            savemat(folder+filename[0:-4]+'.mat',{'I':I})
-
-        else:
-
-            # Export matlab object
-            savemat(folder+filename[0:-4]+'.mat',{'M':I})          
+            if folder is not 'inputs/masks/': 
+                # Rescale images
+                r = dict()
+                for (key, value) in I.items():
+                    r[key] = value['RescaleSlope']*value['Image'] + value['RescaleIntercept']
+                I = r['real'] + 1j*r['complex']
+        
+                # Export matlab object
+                savemat(folder+fname+'.mat',{'I':I})
+            else:
+                # Export matlab object
+                savemat(folder+fname+'.mat',{'M':I})          
 
