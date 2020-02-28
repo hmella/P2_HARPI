@@ -9,17 +9,16 @@ from utils.im_parameters import tag_spacings
 def generate_phantoms(nb_samples,ini=0,fin=0):
 
     # Create folders
-    if not os.path.isdir('inputs/'):
-        os.mkdir('inputs/')
     if not os.path.isdir('inputs/parameters'):
-        os.mkdir('inputs/parameters')
+        os.makedirs('inputs/parameters',exist_ok=True)
     if not os.path.isdir('inputs/spins'):
-        os.mkdir('inputs/spins')
+        os.makedirs('inputs/spins',exist_ok=True)
 
     for d in range(ini,fin):
 
         # Create parameters
-        p = Parameters(time_steps=5)
+        p = Parameters(time_steps=6)
+        p.h = 0.008
 
         # Create spins
         s = Spins(Nb_samples=nb_samples,parameters=p)
@@ -34,9 +33,9 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
 
     # Create folder
     if not os.path.isdir('inputs/kspaces'):
-        os.mkdir('inputs/kspaces')
+        os.makedirs('inputs/kspaces',exist_ok=True)
     if not os.path.isdir('inputs/masks'):
-        os.mkdir('inputs/masks')
+        os.makedirs('inputs/masks',exist_ok=True)
 
     # Resolutions loop
     for (rn, r) in enumerate(resolutions):
@@ -78,7 +77,6 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 s = 0.5*tag_spacings[fn]
                 S_en  = (param.R_en-s)/param.R_en
                 theta = 0.5*s/param.R_en
-                param.h = 0.008
                 param.xi = 0.5
                 param.sigma = 1.0
                 param.phi_en = theta         # endocardial torsion
@@ -87,7 +85,8 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)        
 
                 # Create phantom
-                phantom = Phantom(spins, param, patient=patients[d], z_motion=False)
+                phantom = Phantom(spins, param, patient=patients[d],
+                                  z_motion=False, add_inclusion=True)
 
                 # Artifact
                 artifact = None
@@ -105,16 +104,19 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                     sine_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True)
 
                     # Export images
-                    save_pyobject(sine_image,'inputs/noise_free_images/I_{:03d}_{:02d}_{:02d}.pkl'.format(d,fn,rn))
+                    save_pyobject(sine_image,'inputs/noise_free_images/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+
+                # # Debug plotting
+                # Id = kspace.to_img()
+                # if MPI_rank == 0:
+                #     multi_slice_viewer(np.abs(Id[...,0,0,:]))
 
                 # Compress kspaces
                 kspace.scale()
 
                 # Get boolean mask
-                mask = mask.to_img() > 2
-
-                multi_slice_viewer(mask[...,0,0,:])
+                mask = mask.to_img() > 10
 
                 # Export kspaces and mask
-                save_pyobject(kspace,'inputs/kspaces/I_{:03d}_{:02d}_{:02d}.pkl'.format(d,fn,rn))
-                save_pyobject(mask,'inputs/masks/I_{:03d}_{:02d}_{:02d}.pkl'.format(d,fn,rn))
+                save_pyobject(kspace,'inputs/kspaces/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+                save_pyobject(mask,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))

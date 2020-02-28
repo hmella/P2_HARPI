@@ -9,8 +9,7 @@ from utils.im_parameters import cfrequencies, resolutions
 ##################
 
 # Patients array
-patients = np.ones([args.nb_data,],dtype=np.bool)
-patients[0:int(patients.size/2)] = False 
+patients = np.zeros([args.nb_data,],dtype=np.bool)
 
 
 ##################

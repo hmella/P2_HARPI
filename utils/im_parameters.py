@@ -1,7 +1,7 @@
 import numpy as np
 
 # Resolutions
-resolutions = [np.array([200, 200, 1])]  # pixel_size = 1.0  [mm]
+resolutions = [np.array([200, 200, 1])]
 
 # Encoding frequencies
 tag_spacings = np.array([0.0039, 0.0078, 0.0156])                         # tag spacings [m]
