@@ -8,4 +8,4 @@ tag_spacings = np.array([0.0029, 0.0058, 0.0080, 0.0116])                 # tag 
 cfrequencies = [np.array([2*np.pi/l,2*np.pi/l,0]) for l in tag_spacings]  # encoding frequency [rad/m]
 
 # Noise levels
-noise_levels = np.array([6e-02])
+noise_levels = np.array([15e-02])

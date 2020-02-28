@@ -120,3 +120,44 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 # Export kspaces and mask
                 save_pyobject(kspace,'inputs/kspaces/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
                 save_pyobject(mask,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+
+
+# Add noise to Sine
+def sine_noisy_images(resolutions, frequencies, noise_levels, ini=0, fin=0):
+
+    # Create folder
+    if not os.path.isdir('inputs/noisy_images'):
+        os.makedirs('inputs/noisy_images',exist_ok=True)
+
+    # Resolutions loop
+    for (rn, r) in enumerate(resolutions):
+
+        # Frequencies loop
+        for (fn, f) in enumerate(frequencies):
+         
+            # Data loop
+            for d in range(ini,fin):
+
+                # Load kspaces
+                kspace = load_pyobject('inputs/kspaces/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+
+                # Rescale kspaces
+                kspace.rescale()
+
+                # Noise loop
+                for (nn, n) in enumerate(noise_levels):
+
+                    # Get image
+                    I = kspace.to_img()
+
+                    # Add noise to image
+                    I = add_cpx_noise(I, sigma=n)
+
+                    # # Debug
+                    # multi_slice_viewer(np.abs(I[...,0,0,:])*np.abs(I[...,0,1,:]))
+
+                    # Scale image
+                    I = scale_image(I,mag=False,real=True,compl=True)
+
+                    # Export noisy kspaces
+                    save_pyobject(I,'inputs/noisy_images/I_d{:02d}_f{:01d}_r{:01d}_n{:01d}.pkl'.format(d,fn,rn,nn))
