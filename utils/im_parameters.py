@@ -4,7 +4,7 @@ import numpy as np
 resolutions = [np.array([200, 200, 1])]
 
 # Encoding frequencies
-tag_spacings = np.array([0.0039, 0.0078, 0.0156])                         # tag spacings [m]
+tag_spacings = np.array([0.0029, 0.0058, 0.0080, 0.0116])                 # tag spacings [m]
 cfrequencies = [np.array([2*np.pi/l,2*np.pi/l,0]) for l in tag_spacings]  # encoding frequency [rad/m]
 
 # Noise levels
