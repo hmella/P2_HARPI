@@ -7,7 +7,8 @@ from scipy.io import savemat
 # Input folders
 folders = ['inputs/noise_free_images/',
            'inputs/noisy_images/',
-           'inputs/masks/']
+           'inputs/masks/',
+           'inputs/reference_images/']
 
 for folder in folders:
     for filename in os.listdir(folder):
@@ -18,14 +19,16 @@ for folder in folders:
             I = load_pyobject(folder+filename)
 
             if folder is not 'inputs/masks/': 
-                # Rescale images
-                r = dict()
-                for (key, value) in I.items():
-                    r[key] = value['RescaleSlope']*value['Image'] + value['RescaleIntercept']
-                I = r['real'] + 1j*r['complex']
+
+                # # Rescale images
+                # r = dict()
+                # for (key, value) in I.items():
+                #     r[key] = value['RescaleSlope']*value['Image'] + value['RescaleIntercept']
+                # I = r['real'] + 1j*r['complex']
         
                 # Export matlab object
                 savemat(folder+fname+'.mat',{'I':I})
+
             else:
                 # Export matlab object
                 savemat(folder+fname+'.mat',{'M':I})          

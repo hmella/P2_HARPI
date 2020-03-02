@@ -1,7 +1,7 @@
 import numpy as np
 
 from utils.args_parser import *
-from utils.generation import generate_phantoms, generate_sine
+from utils.generation import generate_phantoms, generate_sine, generate_reference
 from utils.im_parameters import cfrequencies, resolutions
 
 ##################
@@ -21,5 +21,11 @@ if args.generate_parameters:
     generate_phantoms(args.nb_samples,ini=args.initial_data,fin=args.final_data)
 
 # Generate SINE
-generate_sine(resolutions, cfrequencies, patients, ini=args.initial_data,
-                fin=args.final_data, noise_free=args.noise_free)
+if args.generate_sine:
+    generate_sine(resolutions, cfrequencies, patients, ini=args.initial_data,
+                    fin=args.final_data, noise_free=args.noise_free)
+
+# Generate REFERENCE
+if args.generate_reference:
+    generate_reference(resolutions, cfrequencies, patients, ini=args.initial_data,
+                    fin=args.final_data, noise_free=args.noise_free)
