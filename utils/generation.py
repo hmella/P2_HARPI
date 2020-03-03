@@ -115,11 +115,16 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 kspace.scale()
 
                 # Get boolean mask
-                mask = mask.to_img() > 10
+                maskim = mask.to_img() > 100
+
+                # # Debug plotting
+                # Id = mask.to_img()
+                # if MPI_rank == 0:
+                #     multi_slice_viewer(maskim[...,0,0,:])
 
                 # Export kspaces and mask
                 save_pyobject(kspace,'inputs/kspaces/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
-                save_pyobject(mask,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+                save_pyobject(maskim,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
 
 
 # Reference images generation
@@ -187,21 +192,23 @@ def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_f
                     os.mkdir('inputs/reference_images')
 
                 # Get boolean mask
-                mask = mask.to_img() > 20
+                maskim = mask.to_img() > 100
 
                 # Get images and scale
                 exact_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True,type=np.uint32)
 
                 # # Debug plotting
-                # Id = kspace.to_img()
+                # Id = mask.to_img()
                 # if MPI_rank == 0:
-                #     multi_slice_viewer(mask[...,0,0,:])
-                #     multi_slice_viewer(mask[...,0,0,:]*np.abs(Id[...,0,0,:]))
-                #     multi_slice_viewer(mask[...,0,0,:]*np.angle(Id[...,0,0,:]))
+                #     multi_slice_viewer(maskim[...,0,0,:])
+                #     multi_slice_viewer(maskim[...,0,0,:]*np.abs(Id[...,0,0,:]))
+                #     multi_slice_viewer(maskim[...,0,0,:]*np.angle(Id[...,0,0,:]))
+                #     multi_slice_viewer(np.abs(Id[...,0,0,:]))
+                #     multi_slice_viewer(maskim[...,0,0,:])
 
                 # Export kspaces and mask
                 save_pyobject(exact_image,'inputs/reference_images/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
-                save_pyobject(mask,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+                save_pyobject(maskim,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
 
 
 # Add noise to Sine
