@@ -18,18 +18,9 @@ for folder in folders:
             # Load image
             I = load_pyobject(folder+filename)
 
-            if folder is not 'inputs/masks/': 
-
-                # # Rescale images
-                # r = dict()
-                # for (key, value) in I.items():
-                #     r[key] = value['RescaleSlope']*value['Image'] + value['RescaleIntercept']
-                # I = r['real'] + 1j*r['complex']
-        
-                # Export matlab object
+            # Export matlab object
+            if folder is not 'inputs/masks/':         
                 savemat(folder+fname+'.mat',{'I':I})
-
             else:
-                # Export matlab object
                 savemat(folder+fname+'.mat',{'M':I})          
 
