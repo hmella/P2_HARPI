@@ -73,7 +73,7 @@ labels = [true,false,false,false];
 WL = [3,6,8,12];
 
 % Plot error for each tag frequency
-for f=1:4
+for f=[1]%1:4
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -114,14 +114,14 @@ for f=1:4
     % Print results
     fprintf('\nnRMSE results\n')
     fprintf('--------------------------------------------------------\n')
-    fprintf('HARP mean nRMSE: [%.1f, %.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(mean_HARP_mag(f,:)));
-    fprintf('HARP std nRMSE:  [%.1f, %.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(std_HARP_mag(f,:)))
+    fprintf('HARP mean nRMSE: [%.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(mean_HARP_mag(f,2:end)));
+    fprintf('HARP std nRMSE:  [%.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(std_HARP_mag(f,2:end)))
     fprintf('--------------------------------------------------------\n')
-    fprintf('SinMod mean nRMSE: [%.1f, %.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(mean_SinMod_mag(f,:)));
-    fprintf('SinMod std nRMSE:  [%.1f, %.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(std_SinMod_mag(f,:)))
+    fprintf('SinMod mean nRMSE: [%.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(mean_SinMod_mag(f,2:end)));
+    fprintf('SinMod std nRMSE:  [%.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(std_SinMod_mag(f,2:end)))
     fprintf('--------------------------------------------------------\n')
-    fprintf('HARP-I mean nRMSE: [%.1f, %.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(mean_HARPI_mag(f,:)));
-    fprintf('HARP-I std nRMSE:  [%.1f, %.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(std_HARPI_mag(f,:)))
+    fprintf('HARP-I mean nRMSE: [%.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(mean_HARPI_mag(f,2:end)));
+    fprintf('HARP-I std nRMSE:  [%.1f, %.1f, %.1f, %.1f, %.1f]\n',squeeze(std_HARPI_mag(f,2:end)))
 
 
     %% ANGULAR ERROR
@@ -155,14 +155,14 @@ for f=1:4
     % Print results
     fprintf('\nDE results\n')
     fprintf('--------------------------------------------------------\n')
-    fprintf('HARP mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_ang(f,:)));
-    fprintf('HARP std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_ang(f,:)))
+    fprintf('HARP mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_ang(f,2:end)));
+    fprintf('HARP std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_ang(f,2:end)))
     fprintf('--------------------------------------------------------\n')
-    fprintf('SinMod mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_SinMod_ang(f,:)));
-    fprintf('SinMod std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_ang(f,:)))
+    fprintf('SinMod mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_SinMod_ang(f,2:end)));
+    fprintf('SinMod std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_ang(f,2:end)))
     fprintf('--------------------------------------------------------\n')
-    fprintf('HARP-I mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_ang(f,:)));
-    fprintf('HARP-I std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_ang(f,:)))
+    fprintf('HARP-I mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_ang(f,2:end)));
+    fprintf('HARP-I std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_ang(f,2:end)))
 
 
     %% CC-COMPONENT ERROR
