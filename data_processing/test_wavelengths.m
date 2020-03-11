@@ -30,9 +30,9 @@ end
    
 %% INPUT DATA
 % Analysis to be performed
-RUN_EXACT   = true;
-RUN_SinMod  = true;
-RUN_HARP    = true;
+RUN_EXACT   = false;
+RUN_SinMod  = false;
+RUN_HARP    = false;
 RUN_HARPI   = true;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
 RUN_ERROR   = true;
@@ -127,36 +127,6 @@ nRMSE_RR = struct(...
     'HARPI',    tmp,...
     'SinMod',   tmp,...
     'HARP',     tmp);
-
-% Peak, min and mean strain
-tmp = NaN([nod nos Nfr]);
-max_values = struct(...
-        'CC_HARPI', tmp,...
-        'CC_HARP', tmp,...
-        'CC_SinMod', tmp,...
-        'CC_EXACT', tmp,...
-        'RR_HARPI', tmp,...
-        'RR_HARP', tmp,...
-        'RR_SinMod', tmp,...
-        'RR_EXACT', tmp);
-min_values = struct(...
-        'CC_HARPI', tmp,...
-        'CC_HARP', tmp,...
-        'CC_SinMod', tmp,...
-        'CC_EXACT', tmp,...
-        'RR_HARPI', tmp,...
-        'RR_HARP', tmp,...
-        'RR_SinMod', tmp,...
-        'RR_EXACT', tmp);
-mean_values = struct(...
-        'CC_HARPI', tmp,...
-        'CC_HARP', tmp,...
-        'CC_SinMod', tmp,...
-        'CC_EXACT', tmp,...
-        'RR_HARPI', tmp,...
-        'RR_HARP', tmp,...
-        'RR_SinMod', tmp,...
-        'RR_EXACT', tmp);
 
 %% EXACT ANALYSIS
 if RUN_EXACT
@@ -531,12 +501,6 @@ if RUN_ERROR
                 CC_EXACT_ = CC_EXACT(:,:,l);  % CC strain component
                 RR_EXACT_ = RR_EXACT(:,:,l);  % RR strain component
                 me = sqrt(dx_exact(m).^2 + dy_exact(m).^2);   % displacement magnitude
-                min_values.CC_HARP(d,f,l) = min(CC_EXACT_(m));
-                max_values.CC_HARP(d,f,l)  = max(CC_EXACT_(m));
-                min_values.RR_HARP(d,f,l) = min(RR_EXACT_(m));
-                max_values.RR_HARP(d,f,l)  = max(RR_EXACT_(m));
-                mean_values.RR_HARP(d,f,l) = mean(RR_EXACT_(m));
-                mean_values.CC_HARP(d,f,l) = mean(CC_EXACT_(m));
                 
                 % HARP errors
                 if HARP_ERROR
@@ -552,12 +516,7 @@ if RUN_ERROR
                     nRMSE.HARP(d,f,l)  = 1/(max(me)*sqrt(N))*sqrt(sum((dx_harp(m)-dx_exact(m)).^2 + (dy_harp(m)-dy_exact(m)).^2));
                     nRMSE_CC.HARP(d,f,l)  = 1/(max(abs(CC_EXACT_(m)))*sqrt(N))*sqrt(sum((CC_HARP_(m) - CC_EXACT_(m)).^2));
                     nRMSE_RR.HARP(d,f,l)  = 1/(max(abs(RR_EXACT_(m)))*sqrt(N))*sqrt(sum((RR_HARP_(m) - RR_EXACT_(m)).^2));
-                    min_values.CC_HARP(d,f,l) = min(CC_HARP_(m));
-                    max_values.CC_HARP(d,f,l)  = max(CC_HARP_(m));
-                    min_values.RR_HARP(d,f,l) = min(RR_HARP_(m));
-                    max_values.RR_HARP(d,f,l)  = max(RR_HARP_(m));
-                    mean_values.RR_HARP(d,f,l) = mean(RR_HARP_(m));
-                    mean_values.CC_HARP(d,f,l) = mean(CC_HARP_(m));
+
                 end
 
               % SinMod errors
@@ -574,12 +533,7 @@ if RUN_ERROR
                   nRMSE.SinMod(d,f,l)  = 1/(max(me)*sqrt(N))*sqrt(sum((dx_sinmod(m)-dx_exact(m)).^2 + (dy_sinmod(m)-dy_exact(m)).^2));
                   nRMSE_CC.SinMod(d,f,l)  = 1/(max(abs(CC_EXACT_(m)))*sqrt(N))*sqrt(sum((CC_SinMod_(m) - CC_EXACT_(m)).^2));
                   nRMSE_RR.SinMod(d,f,l)  = 1/(max(abs(RR_EXACT_(m)))*sqrt(N))*sqrt(sum((RR_SinMod_(m) - RR_EXACT_(m)).^2));
-                  min_values.CC_SinMod(d,f,l) = min(CC_SinMod_(m));
-                  max_values.CC_SinMod(d,f,l)  = max(CC_SinMod_(m));
-                  min_values.RR_SinMod(d,f,l) = min(RR_SinMod_(m));
-                  max_values.RR_SinMod(d,f,l)  = max(RR_SinMod_(m));
-                  mean_values.RR_SinMod(d,f,l) = mean(RR_SinMod_(m));
-                  mean_values.CC_SinMod(d,f,l) = mean(CC_SinMod_(m));
+
               end
 
               % HARPI errors
@@ -596,12 +550,6 @@ if RUN_ERROR
                   nRMSE.HARPI(d,f,l)  = 1/(max(me)*sqrt(N))*sqrt(sum((dx_harpi(m)-dx_exact(m)).^2 + (dy_harpi(m)-dy_exact(m)).^2));
                   nRMSE_CC.HARPI(d,f,l)  = 1/(max(abs(CC_EXACT_(m)))*sqrt(N))*sqrt(sum((CC_HARPI_(m) - CC_EXACT_(m)).^2));
                   nRMSE_RR.HARPI(d,f,l)  = 1/(max(abs(RR_EXACT_(m)))*sqrt(N))*sqrt(sum((RR_HARPI_(m) - RR_EXACT_(m)).^2));
-                  min_values.CC_HARPI(d,f,l) = min(CC_HARPI_(m));
-                  max_values.CC_HARPI(d,f,l)  = max(CC_HARPI_(m));
-                  min_values.RR_HARPI(d,f,l) = min(RR_HARPI_(m));
-                  max_values.RR_HARPI(d,f,l)  = max(RR_HARPI_(m));
-                  mean_values.RR_HARPI(d,f,l) = mean(RR_HARPI_(m));
-                  mean_values.CC_HARPI(d,f,l) = mean(CC_HARPI_(m));
                   
                   % if l==6
                   %     figure(1)

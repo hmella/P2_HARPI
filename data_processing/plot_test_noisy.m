@@ -1,5 +1,8 @@
 clear; close all; clc;
 
+% Add functions path
+addpath('utils/')
+
 % HARPI options
 undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
@@ -40,12 +43,20 @@ co = [0.0000 0.4470 0.7410
       0.3010 0.7450 0.9330
       0.6350 0.0780 0.1840];
 
-% Sizes and widths
+% Plot settings
+api = struct(...
+    'AxesFontSize',  20,...
+    'AxesLineWidth', 2,...
+    'LegendFontSize', 17,...
+    'LegendLocation', 'northeast',...
+    'Axis', [],...
+    'XLabel', true,...
+    'YLabel', true,...
+    'XLabelStr', 'Displacement (in WL)',...
+    'YLabelStr', [],...
+    'YAxisTickValues', []);
 plot_line_width = 2;
 plot_marker_size = 3.5;
-axis_line_width = 2;
-axis_font_size  = 20;
-legend_font_size = 13;
 
 % Plots visibility
 visibility = 'off';
@@ -56,13 +67,14 @@ dr = 0.17;
 
 % Cardiac phases
 cp = [NaN 1 2 3 4 5];
+labels = [true,false,false,false];
 
 %% ERROR PLOTS
 % Wavelengths
 WL = [3,6,8,12];
 
 % Plot error for each tag frequency
-for f=1:4
+for f=[2]%1:4
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -72,11 +84,33 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_mag(f,:)),squeeze(std_HARPI_mag(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_mag(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0 30])
 
+    % Plot formatting
+    api.XLabel = false;
+    api.YLabel = true;
+    api.YLabelStr = 'nRMSE (\%)';
+    api.Axis = [0.5 5.5 3 15];
+    api.YAxisTickValues = 0:3:15;
+    nice_plot(api);
+
+    % Get current axis and figure
+    if f == 2
+        ref_ax = gca;
+        ref_fig = gcf;
+        fig_pos = get(ref_fig,'position');
+        ax_pos = get(ref_ax,'position');
+        set(gcf,'position',[fig_pos(1) fig_pos(2) fig_pos(3) fig_pos(4)])
+        dx = 0.1;
+        set(gca,'position',[ax_pos(1) ax_pos(2)+dx ax_pos(3) ax_pos(4)-0.6*dx])
+    else
+        fig_pos = get(ref_fig,'position');
+        set(gcf,'position',fig_pos)
+        set(gca,'position',get(ref_ax,'position'))
+    end
+    
     % Print plots
-    print('-depsc','-r600', [figures_dir,sprintf('MAG_wl_%02d',WL(f))]);
-    print('-dpng','-r600', [figures_dir,sprintf('MAG_wl_%02d',WL(f))])
+    print('-depsc','-r600', [figures_dir,sprintf('MAG_WL_%02d',WL(f))]);
+    print('-dpng','-r600', [figures_dir,sprintf('MAG_WL_%02d',WL(f))])
 
     % Print results
     fprintf('\nnRMSE results\n')
@@ -101,14 +135,26 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_ang(f,:)),squeeze(std_HARPI_ang(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_ang(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0.0 12.0],true)
 
+    % Plot formatting
+    api.XLabel = true;
+    api.YLabel = true;
+    api.YLabelStr = 'DE ($^o$)';
+    api.Axis = [0.5 5.5 1.0 6.5];
+    api.YAxisTickValues = 0:1:6;
+    nice_plot(api);
+
+    % Set current axes
+    fig_pos = get(ref_fig,'position');
+    set(gcf,'position',fig_pos)
+    set(gca,'position',get(ref_ax,'position'))
+    
     % Print plots
-    print('-depsc','-r600', [figures_dir,sprintf('DE_wl_%02d',WL(f))]);
-    print('-dpng','-r600', [figures_dir,sprintf('DE_wl_%02d',WL(f))])
+    print('-depsc','-r600', [figures_dir,sprintf('DE_WL_%02d',WL(f))]);
+    print('-dpng','-r600', [figures_dir,sprintf('DE_WL_%02d',WL(f))])
 
     % Print results
-    fprintf('\nDE results\n')
+    fprintf('\n\nDE results\n')
     fprintf('--------------------------------------------------------\n')
     fprintf('HARP mean DE: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_ang(f,:)));
     fprintf('HARP std DE:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_ang(f,:)))
@@ -130,12 +176,35 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_CC(f,:)),squeeze(std_HARPI_CC(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_CC(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0 120],true)
 
+    % Plot formatting
+    api.XLabel = false;
+    api.YLabel = true;
+    api.YLabelStr = 'nRMSE CC (\%)';
+    api.Axis = [0.5 5.5 0 60];
+    api.YAxisTickValues = 0:10:150;
+    nice_plot(api);
+
+    % Get current axes
+    fig_pos = get(ref_fig,'position');
+    set(gcf,'position',fig_pos)
+    set(gca,'position',get(ref_ax,'position'))
+    
     % Print plots
-    print('-depsc','-r600', [figures_dir,sprintf('CC_wl_%02d',WL(f))]);
-    print('-dpng','-r600', [figures_dir,sprintf('CC_%02d',WL(f))])
+    print('-depsc','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))]);
+    print('-dpng','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))])
 
+    % Print results
+    fprintf('\n\nCC nRMSE results\n')
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP mean CC: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_CC(f,:)));
+    fprintf('HARP std CC:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_CC(f,:)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('SinMod mean CC: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_SinMod_CC(f,:)));
+    fprintf('SinMod std CC:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_CC(f,:)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP-I mean CC: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_CC(f,:)));
+    fprintf('HARP-I std CC:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_CC(f,:)));
 
     %% RR-COMPONENT ERROR
 
@@ -147,10 +216,34 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_RR(f,:)),squeeze(std_HARPI_RR(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_RR(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0 180])
 
+    % Plot formatting
+    api.XLabel = true;
+    api.YLabel = true;
+    api.YLabelStr = 'nRMSE RR (\%)';
+    api.Axis = [0.5 5.5 20 95];
+    api.YAxisTickValues = 0:10:100;
+    nice_plot(api);
+
+    % Get current axes
+    fig_pos = get(ref_fig,'position');
+    set(gcf,'position',fig_pos)
+    set(gca,'position',get(ref_ax,'position'))
+    
     % Print plots
-    print('-depsc','-r600', [figures_dir,sprintf('RR_wl_%02d',WL(f))]);
-    print('-dpng','-r600', [figures_dir,sprintf('RR_wl_%02d',WL(f))])
+    print('-depsc','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))]);
+    print('-dpng','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))])
+
+    % Print results
+    fprintf('\n\nRR nRMSE results\n')
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_RR(f,:)));
+    fprintf('HARP std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_RR(f,:)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('SinMod mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_SinMod_RR(f,:)));
+    fprintf('SinMod std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_RR(f,:)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP-I mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_RR(f,:)));
+    fprintf('HARP-I std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_RR(f,:)))    
 
 end

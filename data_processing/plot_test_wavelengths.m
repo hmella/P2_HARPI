@@ -1,5 +1,8 @@
 clear; close all; clc;
 
+% Add functions path
+addpath('utils/')
+
 % HARPI options
 undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
@@ -44,11 +47,11 @@ co = [0.0000 0.4470 0.7410
 api = struct(...
     'AxesFontSize',  20,...
     'AxesLineWidth', 2,...
-    'LegendFontSize', 13,...
+    'LegendFontSize', 17,...
     'Axis', [],...
     'XLabel', true,...
     'YLabel', true,...
-    'XLabelStr', 'displacement (in wavelengths)',...
+    'XLabelStr', 'Displacement (in WL)',...
     'YLabelStr', [],...
     'YAxisTickValues', []);
 plot_line_width = 2;
@@ -63,7 +66,6 @@ dr = 0.17;
 
 % Cardiac phases
 cp = [NaN 1 2 3 4 5];
-labels = [true,false,false,false];
 labels = [true,false,false,false];
 
 %% ERROR PLOTS
@@ -83,9 +85,9 @@ for f=1:4
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
 
     % Plot formatting
-    api.XLabel = 'false';
+    api.XLabel = false;
     api.YLabel = labels(f);
-    api.YLabelStr = 'nRMSE (%)';
+    api.YLabelStr = 'nRMSE (\%)';
     api.Axis = [0.5 5.5 0 20];
     api.YAxisTickValues = 0:5:20;
     nice_plot(api);
@@ -94,11 +96,14 @@ for f=1:4
     if f == 1
         ref_ax = gca;
         ref_fig = gcf;
-        set(gcf,'position',[pos(1) pos(2) 1.1*pos(3) 1.1*pos(4)])
-        set(gca,'position',get(ref_ax,'position'))
+        fig_pos = get(ref_fig,'position');
+        ax_pos = get(ref_ax,'position');
+        set(gcf,'position',[fig_pos(1) fig_pos(2) fig_pos(3) fig_pos(4)])
+        dx = 0.1;
+        set(gca,'position',[ax_pos(1) ax_pos(2)+dx ax_pos(3) ax_pos(4)-0.6*dx])
     else
-        pos = get(ref_fig,'position')
-        set(gcf,'position',pos)
+        fig_pos = get(ref_fig,'position');
+        set(gcf,'position',fig_pos)
         set(gca,'position',get(ref_ax,'position'))
     end
     
@@ -135,12 +140,12 @@ for f=1:4
     api.YLabel = labels(f);
     api.YLabelStr = 'DE ($^o$)';
     api.Axis = [0.5 5.5 0.0 6.0];
-    api.YAxisTickValues = 0:1:6;
+    api.YAxisTickValues = 0:1:5;
     nice_plot(api);
 
     % Set current axes
-    pos = get(ref_fig,'position')
-    set(gcf,'position',pos)
+    fig_pos = get(ref_fig,'position');
+    set(gcf,'position',fig_pos)
     set(gca,'position',get(ref_ax,'position'))
     
     % Print plots
@@ -174,19 +179,19 @@ for f=1:4
     % Plot formatting
     api.XLabel = false;
     api.YLabel = labels(f);
-    api.YLabelStr = 'nRMSE CC (%)';
+    api.YLabelStr = 'nRMSE CC (\%)';
     api.Axis = [0.5 5.5 0 18];
     api.YAxisTickValues = 0:3:18;
     nice_plot(api);
 
     % Get current axes
-    pos = get(ref_fig,'position')
-    set(gcf,'position',pos)
+    fig_pos = get(ref_fig,'position');
+    set(gcf,'position',fig_pos)
     set(gca,'position',get(ref_ax,'position'))
     
     % Print plots
     print('-depsc','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))]);
-    print('-dpng','-r600', [figures_dir,sprintf('CC_%02d',WL(f))])
+    print('-dpng','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))])
 
 
     %% RR-COMPONENT ERROR
@@ -199,19 +204,18 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_RR(f,:)),squeeze(std_HARPI_RR(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_RR(axis_font_size,axis_line_width,legend_font_size,,true,labels(f))
 
     % Plot formatting
     api.XLabel = true;
     api.YLabel = labels(f);
-    api.YLabelStr = 'nRMSE RR (%)';
+    api.YLabelStr = 'nRMSE RR (\%)';
     api.Axis = [0.5 5.5 0 90];
-    api.YAxisTickValues = 0:10:90;
+    api.YAxisTickValues = 0:20:90;
     nice_plot(api);
 
     % Get current axes
-    pos = get(ref_fig,'position');
-    set(gcf,'position',pos)
+    fig_pos = get(ref_fig,'position');
+    set(gcf,'position',fig_pos)
     set(gca,'position',get(ref_ax,'position'))
     
     % Print plots

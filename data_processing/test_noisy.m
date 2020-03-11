@@ -30,9 +30,9 @@ end
    
 %% INPUT DATA
 % Analysis to be performed
-RUN_EXACT   = true;
-RUN_SinMod  = true;
-RUN_HARP    = true;
+RUN_EXACT   = false;
+RUN_SinMod  = false;
+RUN_HARP    = false;
 RUN_HARPI   = true;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
 RUN_ERROR   = true;
@@ -76,7 +76,7 @@ avgundersampling = false;               % average undersampling
 interpolation    = 'MultiquadricO3RBF';   % interpolation scheme ('gridfit'/'tpaps')
 % RBFFactors       = 0.05*ke_spamm;
 % smoothingfac     = 1e-4;
-RBFFactors       = 0.05*ke_spamm;
+RBFFactors       = 0.2*ke_spamm;%0.2*ke_spamm;%0.05*ke_spamm
 smoothingfac     = 1e-4;
 
 % HARPI output folder
@@ -638,7 +638,7 @@ end
 
 
 %% plots
-spa = 1;
+spa = 2;
 figure,
 subplot 221
 errorbar(mean_HARP_mag(spa,2:end),std_HARP_mag(spa,2:end),'LineWidth',2); hold on
