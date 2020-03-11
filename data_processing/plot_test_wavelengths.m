@@ -40,12 +40,19 @@ co = [0.0000 0.4470 0.7410
       0.3010 0.7450 0.9330
       0.6350 0.0780 0.1840];
 
-% Sizes and widths
+% Plot settings
+api = struct(...
+    'AxesFontSize',  20,...
+    'AxesLineWidth', 2,...
+    'LegendFontSize', 13,...
+    'Axis', [],...
+    'XLabel', true,...
+    'YLabel', true,...
+    'XLabelStr', 'displacement (in wavelengths)',...
+    'YLabelStr', [],...
+    'YAxisTickValues', []);
 plot_line_width = 2;
 plot_marker_size = 3.5;
-axis_line_width = 2;
-axis_font_size  = 20;
-legend_font_size = 13;
 
 % Plots visibility
 visibility = 'off';
@@ -74,13 +81,25 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_mag(f,:)),squeeze(std_HARPI_mag(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_mag(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0 20],false,labels(f))
 
-    % Get current axes
+    % Plot formatting
+    api.XLabel = 'false';
+    api.YLabel = labels(f);
+    api.YLabelStr = 'nRMSE (%)';
+    api.Axis = [0.5 5.5 0 20];
+    api.YAxisTickValues = 0:5:20;
+    nice_plot(api);
+
+    % Get current axis and figure
     if f == 1
-        ax_mag = gca;
+        ref_ax = gca;
+        ref_fig = gcf;
+        set(gcf,'position',[pos(1) pos(2) 1.1*pos(3) 1.1*pos(4)])
+        set(gca,'position',get(ref_ax,'position'))
     else
-        set(gca,'position',get(ax_mag,'position'))        
+        pos = get(ref_fig,'position')
+        set(gcf,'position',pos)
+        set(gca,'position',get(ref_ax,'position'))
     end
     
     % Print plots
@@ -110,10 +129,19 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_ang(f,:)),squeeze(std_HARPI_ang(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_ang(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0.0 6.0],true,labels(f))
 
-    % Get current axes
-    set(gca,'position',get(ax_mag,'position'))
+    % Plot formatting
+    api.XLabel = true;
+    api.YLabel = labels(f);
+    api.YLabelStr = 'DE ($^o$)';
+    api.Axis = [0.5 5.5 0.0 6.0];
+    api.YAxisTickValues = 0:1:6;
+    nice_plot(api);
+
+    % Set current axes
+    pos = get(ref_fig,'position')
+    set(gcf,'position',pos)
+    set(gca,'position',get(ref_ax,'position'))
     
     % Print plots
     print('-depsc','-r600', [figures_dir,sprintf('DE_WL_%02d',WL(f))]);
@@ -142,10 +170,19 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_CC(f,:)),squeeze(std_HARPI_CC(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_CC(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0 18],false,labels(f))
+
+    % Plot formatting
+    api.XLabel = false;
+    api.YLabel = labels(f);
+    api.YLabelStr = 'nRMSE CC (%)';
+    api.Axis = [0.5 5.5 0 18];
+    api.YAxisTickValues = 0:3:18;
+    nice_plot(api);
 
     % Get current axes
-    set(gca,'position',get(ax_mag,'position'))
+    pos = get(ref_fig,'position')
+    set(gcf,'position',pos)
+    set(gca,'position',get(ref_ax,'position'))
     
     % Print plots
     print('-depsc','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))]);
@@ -162,10 +199,20 @@ for f=1:4
             'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
     errorbar(cp+dr,squeeze(mean_HARPI_RR(f,:)),squeeze(std_HARPI_RR(f,:)),'o',...
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
-    nice_plot_RR(axis_font_size,axis_line_width,legend_font_size,[0.5 5.5 0 90],true,labels(f))
+    nice_plot_RR(axis_font_size,axis_line_width,legend_font_size,,true,labels(f))
+
+    % Plot formatting
+    api.XLabel = true;
+    api.YLabel = labels(f);
+    api.YLabelStr = 'nRMSE RR (%)';
+    api.Axis = [0.5 5.5 0 90];
+    api.YAxisTickValues = 0:10:90;
+    nice_plot(api);
 
     % Get current axes
-    set(gca,'position',get(ax_mag,'position'))
+    pos = get(ref_fig,'position');
+    set(gcf,'position',pos)
+    set(gca,'position',get(ref_ax,'position'))
     
     % Print plots
     print('-depsc','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))]);

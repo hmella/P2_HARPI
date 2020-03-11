@@ -1,4 +1,4 @@
-function nice_plot_CC(varargin)
+function nice_plot(varargin)
   %NICE_PLOT_MAG Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -13,7 +13,8 @@ function nice_plot_CC(varargin)
             'YLabel', true,...
             'XLabelStr', 'displacement (in wavelengths)',...
             'YLabelStr', [],...
-            'NoisyData', false);
+            'YAxisTickValues', 0:10:100,...
+            'YAxisExponent', 0);
 
     % Check input
     api = parseinputs(defapi, [], varargin{:});
@@ -36,16 +37,13 @@ function nice_plot_CC(varargin)
     end
 
     % Set YAxis labels
-    if noisy_data
-        ax.YAxis.TickValues = 0:20:200;
-    else
-        ax.YAxis.TickValues = 0:5:200;
-    end
+    ax.YAxis.TickValues = api.YAxisTickValues;
     if api.YLabel
         ylabel(api.YLabelStr, 'interpreter', 'LaTeX')
     else
         ax.YAxis.TickLabels = [];
     end
+    ax.YAxis.Exponent = api.YAxisExponent;
     ax.XGrid = 'off';
     ax.YGrid = 'off';
     ax.XMinorGrid = 'on';
