@@ -2,3 +2,5 @@ inputs
 outputs
 utils/__pycache__
 .vscode
+*.png
+*.eps
