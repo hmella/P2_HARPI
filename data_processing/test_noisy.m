@@ -33,7 +33,7 @@ end
 RUN_EXACT   = false;
 RUN_SinMod  = false;
 RUN_HARP    = false;
-RUN_HARPI   = true;
+RUN_HARPI   = false;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
 RUN_ERROR   = true;
 
@@ -71,13 +71,17 @@ ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
 
 %% HARPI INTERPOLATION SPECS
 % HARPI options
+% undersamplingfac = 1;                   % undersampling factor
+% avgundersampling = false;               % average undersampling 
+% interpolation    = 'MultiquadricO3RBF';   % interpolation scheme ('gridfit'/'tpaps')
+% RBFFactors       = 0.2*ke_spamm;%0.2*ke_spamm;%0.05*ke_spamm
+% smoothingfac     = 1e-4;
+
 undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
-interpolation    = 'MultiquadricO3RBF';   % interpolation scheme ('gridfit'/'tpaps')
-% RBFFactors       = 0.05*ke_spamm;
-% smoothingfac     = 1e-4;
-RBFFactors       = 0.2*ke_spamm;%0.2*ke_spamm;%0.05*ke_spamm
-smoothingfac     = 1e-4;
+interpolation    = 'MultiquadricO3RBF'; % interpolation scheme ('gridfit'/'tpaps')
+RBFFactors       = 0.05*ke_spamm;       %0.2*ke_spamm;%0.05*ke_spamm
+smoothingfac     = 1e-01*(ke_spamm/ke_spamm(2));
 
 % HARPI output folder
 if avgundersampling
@@ -429,7 +433,7 @@ if RUN_TAGGING
                         'Method',           interpolation,...
                         'RBFFactor',        [1 1.75]*RBFFactors(f),...
                         'RBFFacDist',       'DecreasingLinear',...
-                        'SpatialSmoothing', smoothingfac,...
+                        'SpatialSmoothing', smoothingfac(f),...
                         'UndersamplingFac', undersamplingfac,...
                         'AvgUndersampling', avgundersampling,...
                         'Seed',             'auto',...
@@ -441,12 +445,7 @@ if RUN_TAGGING
                         'KSpaceFollowing',  KSpaceFollowing,...
                         'PeakCombination',  false,...
                         'RefPhaseSmoothing',true);
-                try
-                    metadata = HARPI(I, args);
-                catch
-                    args.TrackingSupport = true;
-                    metadata = HARPI(I, args);
-                end
+                metadata = HARPI(I, args);
                 ux_HARPI = metadata.arraydx;
                 uy_HARPI = metadata.arraydy;
                 dxi = ux_HARPI;%*pxsz(1);    % pixels to meters
@@ -472,11 +471,13 @@ if RUN_TAGGING
                 CC_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.CC(:);
 
                 % figure(1)
+                % load(['outputs/noisy/Exact/',filename]);
+                % CC = CC_EXACT(:,:,end);
+                % CA = [min(CC(:)) max(CC(:))];
                 % subplot 121
-                % imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet)
+                % imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
                 % subplot 122
-                % imagesc(RR_HARPI(:,:,end)); colorbar; colormap(jet)
-                % pause(0.1)
+                % imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
 
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
@@ -599,14 +600,36 @@ if RUN_ERROR
                   mean_values.RR_HARPI(d,f,l) = mean(RR_HARPI_(m));
                   mean_values.CC_HARPI(d,f,l) = mean(CC_HARPI_(m));
                   
-                  % if l==6
-                  %     figure(1)
-                  %     subplot 121;
-                  %     imagesc(CC_EXACT_); colorbar; caxis([min(CC_EXACT_(:)) max(CC_EXACT_(:))])
-                  %     subplot 122;
-                  %     imagesc(CC_HARPI_); colorbar; caxis([min(CC_EXACT_(:)) max(CC_EXACT_(:))])
-                  %     pause(0.1)
-                  % end
+                  if l==6 && f==3
+                      figure('visible','off')
+                      CA = [min(CC_EXACT_(:)) max(CC_EXACT_(:))];
+                      imagesc(CC_EXACT_); colorbar; caxis(CA)
+                      colormap(jet)
+                      axis off square
+                      print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
+                      print('-dpng','-r600', sprintf('%01d_CC_EXACT',d));
+
+                      figure('visible','off')
+                      imagesc(CC_HARP_); colorbar; caxis(CA)
+                      colormap(jet)
+                      axis off square  
+                      print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
+                      print('-dpng','-r600', sprintf('%01d_CC_HARP',d));
+                      
+                      figure('visible','off')
+                      imagesc(CC_SinMod_); colorbar; caxis(CA)
+                      colormap(jet)
+                      axis off square
+                      print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
+                      print('-dpng','-r600', sprintf('%01d_CC_SinMod',d));
+
+                      figure('visible','off')
+                      imagesc(CC_HARPI_); colorbar; caxis(CA)
+                      colormap(jet)
+                      axis off square                      
+                      print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
+                      print('-dpng','-r600', sprintf('%01d_CC_HARPI',d));
+                  end
                   
               end
                 
@@ -638,7 +661,7 @@ end
 
 
 %% plots
-spa = 2;
+spa = 3;
 figure,
 subplot 221
 errorbar(mean_HARP_mag(spa,2:end),std_HARP_mag(spa,2:end),'LineWidth',2); hold on
@@ -671,7 +694,7 @@ errorbar(mean_HARP_CC(spa,2:end),std_HARP_CC(spa,2:end),'LineWidth',2); hold on
 errorbar(mean_HARPI_CC(spa,2:end),std_HARPI_CC(spa,2:end),'LineWidth',2); hold on
 errorbar(mean_SinMod_CC(spa,2:end),std_SinMod_CC(spa,2:end),'LineWidth',2); hold off
 legend('HARP','HARPI','SinMod')
-axis([0 6 0 160])
+axis([0 6 0 40])
 xlabel('displacement (in wavelengths)', 'interpreter', 'LaTeX');
 ylabel('CC nRMSE (\%)', 'interpreter', 'LaTeX')
 ax = gca;
@@ -684,7 +707,7 @@ errorbar(mean_HARP_RR(spa,2:end),std_HARP_RR(spa,2:end),'LineWidth',2); hold on
 errorbar(mean_HARPI_RR(spa,2:end),std_HARPI_RR(spa,2:end),'LineWidth',2); hold on
 errorbar(mean_SinMod_RR(spa,2:end),std_SinMod_RR(spa,2:end),'LineWidth',2); hold off
 legend('HARP','HARPI','SinMod')
-axis([0 6 0 250])
+axis([0 6 0 100])
 xlabel('displacement (in wavelengths)', 'interpreter', 'LaTeX');
 ylabel('RR nRMSE (\%)', 'interpreter', 'LaTeX')
 ax = gca;
