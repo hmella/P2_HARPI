@@ -244,6 +244,30 @@ for f=[2]%1:4
     fprintf('SinMod std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_RR(f,:)))
     fprintf('--------------------------------------------------------\n')
     fprintf('HARP-I mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_RR(f,:)));
-    fprintf('HARP-I std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_RR(f,:)))    
+    fprintf('HARP-I std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_RR(f,:)))
+
+    % Print mean errors
+    fprintf('\n\n Average errors and stds across displacements:')
+    fprintf('\n  nRMSE and DE means:')
+    a = mean_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = mean_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = mean_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = mean_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
+    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = mean_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = mean_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+
+    fprintf('\n  nRMSE and DE stds:')
+    a = std_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = std_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = std_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = std_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
+    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = std_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = std_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f°\n',mu,stdev,mub,stdevb)
 
 end

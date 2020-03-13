@@ -249,7 +249,7 @@ end
 %% SinMod AND HARP ANALYSIS
 if RUN_TAGGING
 
-    for f=1:nos
+    for f=[1 2 4]%1:nos
 
         % SPAMM encoding frequency
         ke = [ke_spamm(f) ke_spamm(f)];
@@ -492,7 +492,7 @@ end
 
 %% ERROR ANALYSIS
 if RUN_ERROR
-    for f=1:nos         % spacing
+    for f=[1 2 4]%1:nos         % spacing
         
         % Mean values
         mean_h = zeros([nod Nfr]);
@@ -600,31 +600,44 @@ if RUN_ERROR
                   mean_values.RR_HARPI(d,f,l) = mean(RR_HARPI_(m));
                   mean_values.CC_HARPI(d,f,l) = mean(CC_HARPI_(m));
                   
-                  if l==6 && f==3
+                  if l==6 && f==2
+                      r = 10:90;
                       figure('visible','off')
                       CA = [min(CC_EXACT_(:)) max(CC_EXACT_(:))];
-                      imagesc(CC_EXACT_); colorbar; caxis(CA)
+                      imagesc(CC_EXACT_(r,r),'alphadata',m(r,r));
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
                       colormap(jet)
                       axis off square
                       print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
                       print('-dpng','-r600', sprintf('%01d_CC_EXACT',d));
 
                       figure('visible','off')
-                      imagesc(CC_HARP_); colorbar; caxis(CA)
+                      imagesc(CC_HARP_(r,r),'alphadata',m(r,r));
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
                       colormap(jet)
                       axis off square  
                       print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
                       print('-dpng','-r600', sprintf('%01d_CC_HARP',d));
                       
                       figure('visible','off')
-                      imagesc(CC_SinMod_); colorbar; caxis(CA)
+                      imagesc(CC_SinMod_(r,r),'alphadata',m(r,r));
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
                       colormap(jet)
                       axis off square
                       print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
                       print('-dpng','-r600', sprintf('%01d_CC_SinMod',d));
 
                       figure('visible','off')
-                      imagesc(CC_HARPI_); colorbar; caxis(CA)
+                      imagesc(CC_HARPI_(r,r),'alphadata',m(r,r)); 
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
                       colormap(jet)
                       axis off square                      
                       print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
@@ -661,7 +674,7 @@ end
 
 
 %% plots
-spa = 3;
+spa = 2;
 figure,
 subplot 221
 errorbar(mean_HARP_mag(spa,2:end),std_HARP_mag(spa,2:end),'LineWidth',2); hold on

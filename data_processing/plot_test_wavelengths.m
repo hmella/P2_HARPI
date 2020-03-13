@@ -73,7 +73,7 @@ labels = [true,false,false,false];
 WL = [3,6,8,12];
 
 % Plot error for each tag frequency
-for f=[1]%1:4
+for f=[2]%1:4
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -93,7 +93,7 @@ for f=[1]%1:4
     nice_plot(api);
 
     % Get current axis and figure
-    if f == 1
+    if f == 2
         ref_ax = gca;
         ref_fig = gcf;
         fig_pos = get(ref_fig,'position');
@@ -221,5 +221,29 @@ for f=[1]%1:4
     % Print plots
     print('-depsc','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))]);
     print('-dpng','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))])
+
+    % Print mean errors
+    fprintf('\n\n Average errors and stds across displacements:')
+    fprintf('\n  nRMSE and DE means:')
+    a = mean_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = mean_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = mean_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = mean_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
+    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = mean_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = mean_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+
+    fprintf('\n  nRMSE and DE stds:')
+    a = std_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = std_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = std_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = std_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
+    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
+    a = std_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
+    b = std_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
+    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f°\n',mu,stdev,mub,stdevb)
 
 end
