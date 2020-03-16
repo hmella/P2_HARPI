@@ -253,7 +253,7 @@ for f=[2]%1:4
     b = mean_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
     a = mean_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
+    b = mean_SinMod_ang([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
     a = mean_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
     b = mean_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
@@ -264,7 +264,7 @@ for f=[2]%1:4
     b = std_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
     a = std_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
+    b = std_SinMod_ang([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
     a = std_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
     b = std_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
@@ -275,7 +275,7 @@ for f=[2]%1:4
     b = mean_HARP_RR([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
     a = mean_SinMod_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_SinMod_RR([2],2:end); mub = mean(a); stdevb = std(b);
+    b = mean_SinMod_RR([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
     a = mean_HARPI_CC([2],2:end); mu = mean(a); stdev = std(a);
     b = mean_HARPI_RR([2],2:end); mub = mean(b); stdevb = std(b);
@@ -286,7 +286,7 @@ for f=[2]%1:4
     b = std_HARP_RR([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
     a = std_SinMod_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_SinMod_RR([2],2:end); mub = mean(a); stdevb = std(b);
+    b = std_SinMod_RR([2],2:end); mub = mean(b); stdevb = std(b);
     fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
     a = std_HARPI_CC([2],2:end); mu = mean(a); stdev = std(a);
     b = std_HARPI_RR([2],2:end); mub = mean(b); stdevb = std(b);
