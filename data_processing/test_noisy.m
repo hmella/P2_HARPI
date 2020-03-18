@@ -33,7 +33,7 @@ end
 RUN_EXACT   = false;
 RUN_SinMod  = false;
 RUN_HARP    = false;
-RUN_HARPI   = false;
+RUN_HARPI   = true;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
 RUN_ERROR   = true;
 
@@ -77,11 +77,24 @@ ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
 % RBFFactors       = 0.2*ke_spamm;%0.2*ke_spamm;%0.05*ke_spamm
 % smoothingfac     = 1e-4;
 
+% % Current working setup (Butterworth)
+% undersamplingfac = 1;                   % undersampling factor
+% avgundersampling = false;               % average undersampling 
+% interpolation    = 'MultiquadricO3RBF'; % interpolation scheme ('gridfit'/'tpaps')
+% RBFFactors       = 0.05*ke_spamm;       %0.2*ke_spamm;%0.05*ke_spamm
+% smoothingfac     = 1e-01*(ke_spamm/ke_spamm(2));
+
+% Current working setup (Transmission)
+alpha = (ke_spamm/ke_spamm(1)).^1;
 undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
 interpolation    = 'MultiquadricO3RBF'; % interpolation scheme ('gridfit'/'tpaps')
-RBFFactors       = 0.05*ke_spamm;       %0.2*ke_spamm;%0.05*ke_spamm
-smoothingfac     = 1e-01*(ke_spamm/ke_spamm(2));
+RBFFactors       = 0.05*ke_spamm(1)*alpha;
+smoothingfac     = 1.0e-02*alpha;
+
+figure(1)
+plot(ke_spamm,0.05*ke_spamm(1)*alpha,'s-')
+pause
 
 % HARPI output folder
 if avgundersampling
@@ -249,7 +262,7 @@ end
 %% SinMod AND HARP ANALYSIS
 if RUN_TAGGING
 
-    for f=[1 2 4]%1:nos
+    for f=[2 4]%[1 2 4]%1:nos
 
         % SPAMM encoding frequency
         ke = [ke_spamm(f) ke_spamm(f)];
@@ -415,15 +428,15 @@ if RUN_TAGGING
                 % Seed points
                 seeds_mask = bwmorph(M(:,:,1),'skel',Inf);
                 [X,Y] = meshgrid(1:Isz(2),1:Isz(1));
-                xi = X(seeds_mask); xi = xi(2:3:end);
-                yi = Y(seeds_mask); yi = yi(2:3:end);
+                xi = X(seeds_mask); xi = xi(2:5:end);
+                yi = Y(seeds_mask); yi = yi(2:5:end);
 
                 args = struct(...
                         'Mask',             M,...
-                        'ke',               ke.*pxsz,...
-                        'FOV',              Isz(1:2),...
-                        'PixelSize',        [1 1],...
-                        'SearchWindow',     [3,3],...
+                        'ke',               ke,...
+                        'FOV',              [0.1 0.1],...
+                        'PixelSize',        pxsz,...
+                        'SearchWindow',     [0,0],...
                         'PhaseWindow',      [2,2],...
                         'Frames',           1:Nfr,...
                         'theta',            deg2rad([0 90]),...
@@ -431,7 +444,7 @@ if RUN_TAGGING
                         'ShowConvergence',  false,...
                         'tol',              1e-8,...
                         'Method',           interpolation,...
-                        'RBFFactor',        [1 1.75]*RBFFactors(f),...
+                        'RBFFactor',        [1 1]*RBFFactors(f),...,...
                         'RBFFacDist',       'DecreasingLinear',...
                         'SpatialSmoothing', smoothingfac(f),...
                         'UndersamplingFac', undersamplingfac,...
@@ -470,14 +483,14 @@ if RUN_TAGGING
                 RR_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.RR(:);
                 CC_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.CC(:);
 
-                % figure(1)
-                % load(['outputs/noisy/Exact/',filename]);
-                % CC = CC_EXACT(:,:,end);
-                % CA = [min(CC(:)) max(CC(:))];
-                % subplot 121
-                % imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
-                % subplot 122
-                % imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
+                figure(1)
+                load(['outputs/noisy/Exact/',filename]);
+                CC = CC_EXACT(:,:,end);
+                CA = [min(CC(:)) max(CC(:))];
+                subplot 121
+                imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
+                subplot 122
+                imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
 
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
@@ -610,7 +623,7 @@ if RUN_ERROR
                       caxis(CA)
                       colormap(jet)
                       axis off square
-                      print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
+                      % print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
                       print('-dpng','-r600', sprintf('%01d_CC_EXACT',d));
 
                       figure('visible','off')
@@ -620,7 +633,7 @@ if RUN_ERROR
                       caxis(CA)
                       colormap(jet)
                       axis off square  
-                      print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
+                      % print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
                       print('-dpng','-r600', sprintf('%01d_CC_HARP',d));
                       
                       figure('visible','off')
@@ -630,7 +643,7 @@ if RUN_ERROR
                       caxis(CA)
                       colormap(jet)
                       axis off square
-                      print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
+                      % print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
                       print('-dpng','-r600', sprintf('%01d_CC_SinMod',d));
 
                       figure('visible','off')
@@ -640,7 +653,7 @@ if RUN_ERROR
                       caxis(CA)
                       colormap(jet)
                       axis off square                      
-                      print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
+                      % print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
                       print('-dpng','-r600', sprintf('%01d_CC_HARPI',d));
                   end
                   
@@ -727,3 +740,4 @@ ax = gca;
 ax.XAxis.TickLabels = [0.1 0.2 0.3 0.4 0.5];
 ax.XAxis.TickValues = [1 2 3 4 5];
 ax.YAxis.TickValues = [0 40 80 120 160 200 240];
+

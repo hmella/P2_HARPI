@@ -70,13 +70,12 @@ ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
 
 %% HARPI INTERPOLATION SPECS
 % HARPI options
-undersamplingfac = 1;                   % undersampling factor
-avgundersampling = false;               % average undersampling 
-% When using Multiquadric RBFs, good chooses
-% of RBF and smoothing factors are
-interpolation = 'MultiquadricO3RBF';   % interpolation scheme ('gridfit'/'tpaps')
-RBFFactors    = 0.05*ke_spamm;
-smoothingfac  = 1e-4;
+alpha = (ke_spamm/ke_spamm(1));
+undersamplingfac = 1;                 % undersampling factor
+avgundersampling = false;             % average undersampling 
+interpolation = 'MultiquadricO3RBF';  % interpolation scheme
+RBFFactors    = 0.05*ke_spamm;%.*alpha;
+smoothingfac  = 1e-4*alpha;
 
 % % % When using Wendland RBF, good chooses
 % % % of RBF and smoothing factors are
@@ -224,7 +223,7 @@ end
 %% SinMod AND HARP ANALYSIS
 if RUN_TAGGING
 
-    for f=1:nos
+    for f=[1 2 4]%1:nos
 
         % SPAMM encoding frequency
         ke = [ke_spamm(f) ke_spamm(f)];
@@ -390,14 +389,14 @@ if RUN_TAGGING
                 % Seed points
                 seeds_mask = bwmorph(M(:,:,1),'skel',Inf);
                 [X,Y] = meshgrid(1:Isz(2),1:Isz(1));
-                xi = X(seeds_mask); xi = xi(2:3:end);
-                yi = Y(seeds_mask); yi = yi(2:3:end);
+                xi = X(seeds_mask); xi = xi(1:3:end);
+                yi = Y(seeds_mask); yi = yi(1:3:end);
 
                 args = struct(...
                         'Mask',             M,...
-                        'ke',               ke.*pxsz,...
-                        'FOV',              Isz(1:2),...
-                        'PixelSize',        [1 1],...
+                        'ke',               ke,...
+                        'FOV',              Isz(1:2).*pxsz,...
+                        'PixelSize',        pxsz,...
                         'SearchWindow',     [3,3],...
                         'PhaseWindow',      [2,2],...
                         'Frames',           1:Nfr,...
@@ -406,9 +405,9 @@ if RUN_TAGGING
                         'ShowConvergence',  false,...
                         'tol',              1e-8,...
                         'Method',           interpolation,...
-                        'RBFFactor',        [1 1.75]*RBFFactors(f),...
+                        'RBFFactor',        [1 1]*RBFFactors(f),...[1 1.75]*RBFFactors(f),...
                         'RBFFacDist',       'DecreasingLinear',...
-                        'SpatialSmoothing', smoothingfac,...
+                        'SpatialSmoothing', smoothingfac(f),...
                         'UndersamplingFac', undersamplingfac,...
                         'AvgUndersampling', avgundersampling,...
                         'Seed',             'auto',...
@@ -445,12 +444,14 @@ if RUN_TAGGING
                 RR_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.RR(:);
                 CC_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.CC(:);
 
-                % figure(1)
-                % subplot 121
-                % imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet)
-                % subplot 122
-                % imagesc(RR_HARPI(:,:,end)); colorbar; colormap(jet)
-                % pause(0.1)
+                figure(1)
+                load(['outputs/noise_free/Exact/',filename]);
+                CC = CC_EXACT(:,:,end);
+                CA = [min(CC(:)) max(CC(:))];
+                subplot 121
+                imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
+                subplot 122
+                imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
 
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
@@ -590,7 +591,7 @@ end
 
 
 %% plots
-spa = 3;
+spa = 4;
 figure,
 subplot 221
 errorbar(mean_HARP_mag(spa,2:end),std_HARP_mag(spa,2:end),'LineWidth',2); hold on
