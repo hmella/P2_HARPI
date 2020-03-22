@@ -1,7 +1,8 @@
 import numpy as np
 
 from utils.args_parser import *
-from utils.generation import generate_phantoms, generate_sine, generate_reference
+from utils.generation import (generate_phantoms, generate_reference,
+                              generate_sine)
 from utils.im_parameters import cfrequencies, resolutions
 
 ##################

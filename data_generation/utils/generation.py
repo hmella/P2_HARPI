@@ -2,8 +2,6 @@ import os
 
 from PyMRStrain import *
 
-from utils.im_parameters import tag_spacings
-
 
 # Parameters generation
 def generate_phantoms(nb_samples,ini=0,fin=0):
@@ -45,7 +43,7 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
         T1 = -1.0/np.log(decay)
 
         # Create image
-        I = SINEImage(FOV=np.array([0.1, 0.1, 0.008]),
+        I = SINEImage(FOV=np.array([0.2, 0.2, 0.008]),
                   center=np.array([0.0,0.0,0.0]),
                   resolution=r,
                   encoding_frequency=np.array([0,0,0]),
@@ -77,7 +75,8 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 param = load_pyobject('inputs/parameters/p_{:03d}.pkl'.format(d))
 
                 # Modify some values
-                s = 0.5*tag_spacings[fn]
+                tag_spacing = 2.0*np.pi/f[0]
+                s = 0.5*tag_spacing
                 S_en  = (param.R_en-s)/param.R_en
                 theta = 0.5*s/param.R_en
                 param.xi = 0.5
@@ -130,9 +129,8 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 save_pyobject(kspace,'inputs/kspaces/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
                 save_pyobject(maskim,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
 
-
 # Reference images generation
-def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_free=False):
+def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_free=False, RBF=False):
 
     # Create folder
     if not os.path.isdir('inputs/masks'):
@@ -146,7 +144,7 @@ def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_f
         T1 = -1.0/np.log(decay)
 
         # Create image
-        I = EXACTImage(FOV=np.array([0.1, 0.1, 0.008]),
+        I = EXACTImage(FOV=np.array([0.2, 0.2, 0.008]),
                     center=np.array([0.0,0.0,0.0]),
                     resolution=r,
                     encoding_frequency=np.array([100.0,100.0,0.0]),
@@ -174,7 +172,8 @@ def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_f
                 param = load_pyobject('inputs/parameters/p_{:03d}.pkl'.format(d))
 
                 # Modify some values
-                s = 0.5*tag_spacings[fn]
+                tag_spacing = 2.0*np.pi/f[0]
+                s = 0.5*tag_spacing
                 S_en  = (param.R_en-s)/param.R_en
                 theta = 0.5*s/param.R_en
                 param.xi = 0.5
@@ -215,7 +214,6 @@ def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_f
 
                 # Export kspaces and mask
                 save_pyobject(exact_image,'inputs/reference_images/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
-
 
 # Add noise to Sine
 def sine_noisy_images(resolutions, frequencies, noise_levels, ini=0, fin=0):
