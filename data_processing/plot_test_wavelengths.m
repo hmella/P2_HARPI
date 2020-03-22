@@ -6,7 +6,7 @@ addpath('utils/')
 % HARPI options
 undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
-interpolation    = 'MultiquadricO3RBF'; % interpolation scheme ('gridfit'/'tpaps')
+interpolation    = 'Multiquadric3'; % interpolation scheme ('gridfit'/'tpaps')
 
 % Output folder
 harpi_output = 'outputs/noise_free/HARPI/';
@@ -35,13 +35,8 @@ load([harpi_output,'workspace.mat'],...
          'nRMSE','nRMSE_CC')
 
 % Colors
-co = [0.0000 0.4470 0.7410
-      0.8500 0.3250 0.0980
-      0.9290 0.6940 0.1250
-      0.4940 0.1840 0.5560
-      0.4660 0.6740 0.1880
-      0.3010 0.7450 0.9330
-      0.6350 0.0780 0.1840];
+% co = linspecer(3);
+co = distinguishable_colors(3,'w');
 
 % Plot settings
 api = struct(...
@@ -73,7 +68,7 @@ labels = [true,false,false,false];
 WL = [3,6,8,12];
 
 % Plot error for each tag frequency
-for f=[2]%1:4
+for f=1:4
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -93,7 +88,7 @@ for f=[2]%1:4
     nice_plot(api);
 
     % Get current axis and figure
-    if f == 2
+    if f == 1
         ref_ax = gca;
         ref_fig = gcf;
         fig_pos = get(ref_fig,'position');
@@ -180,7 +175,7 @@ for f=[2]%1:4
     api.XLabel = false;
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE CC (\%)';
-    api.Axis = [0.5 5.5 0 18];
+    api.Axis = [0.5 5.5 0 15];
     api.YAxisTickValues = 0:3:18;
     nice_plot(api);
 
@@ -209,7 +204,7 @@ for f=[2]%1:4
     api.XLabel = true;
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE RR (\%)';
-    api.Axis = [0.5 5.5 0 90];
+    api.Axis = [0.5 5.5 0 100];
     api.YAxisTickValues = 0:20:90;
     nice_plot(api);
 

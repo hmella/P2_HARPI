@@ -33,7 +33,7 @@ end
 RUN_EXACT   = false;
 RUN_SinMod  = false;
 RUN_HARP    = false;
-RUN_HARPI   = true;
+RUN_HARPI   = false;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
 RUN_ERROR   = true;
 
@@ -61,7 +61,7 @@ KSpaceFollowing = false;
 %% IMAGING PARAMETERS
 % Resolutions
 pxsz = [0.001,0.001];
-FOV  = [0.1 0.1];
+FOV  = [0.2 0.2];
 resolution = FOV./pxsz;
 
 % Encoding frequencies
@@ -70,12 +70,11 @@ ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
 
 %% HARPI INTERPOLATION SPECS
 % HARPI options
-alpha = (ke_spamm/ke_spamm(1));
 undersamplingfac = 1;                 % undersampling factor
 avgundersampling = false;             % average undersampling 
-interpolation = 'MultiquadricO3RBF';  % interpolation scheme
-RBFFactors    = 0.05*ke_spamm;%.*alpha;
-smoothingfac  = 1e-4*alpha;
+interpolation = 'Multiquadric3';  % interpolation scheme
+RBFFactors    = 0.01*ke_spamm;
+smoothingfac  = 1e-16;
 
 % % % When using Wendland RBF, good chooses
 % % % of RBF and smoothing factors are
@@ -149,7 +148,7 @@ if RUN_EXACT
             I = Ir + Ii;
 
             % Squeeze images
-            range = 1:100;
+            range = 1:200;
             I = squeeze(I(range,range,1,:,:));
             M = squeeze(M(range,range,1,1,:));
 
@@ -223,7 +222,7 @@ end
 %% SinMod AND HARP ANALYSIS
 if RUN_TAGGING
 
-    for f=[1 2 4]%1:nos
+    for f=1:nos
 
         % SPAMM encoding frequency
         ke = [ke_spamm(f) ke_spamm(f)];
@@ -243,7 +242,7 @@ if RUN_TAGGING
             I = Ir + Ii;
             
             % Squeeze data
-            range = 1:100;
+            range = 1:200;
             I = squeeze(I(range,range,1,:,:));
             M = squeeze(M(range,range,1,1,:));
 
@@ -407,7 +406,7 @@ if RUN_TAGGING
                         'Method',           interpolation,...
                         'RBFFactor',        [1 1]*RBFFactors(f),...[1 1.75]*RBFFactors(f),...
                         'RBFFacDist',       'DecreasingLinear',...
-                        'SpatialSmoothing', smoothingfac(f),...
+                        'SpatialSmoothing', smoothingfac,...
                         'UndersamplingFac', undersamplingfac,...
                         'AvgUndersampling', avgundersampling,...
                         'Seed',             'auto',...
@@ -444,14 +443,21 @@ if RUN_TAGGING
                 RR_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.RR(:);
                 CC_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.CC(:);
 
-                figure(1)
-                load(['outputs/noise_free/Exact/',filename]);
-                CC = CC_EXACT(:,:,end);
-                CA = [min(CC(:)) max(CC(:))];
-                subplot 121
-                imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
-                subplot 122
-                imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 figure(1)
+%                 load(['outputs/noise_free/Exact/',filename]);
+%                 load(['outputs/noise_free/HARP/',filename]);
+%                 load(['outputs/noise_free/SinMod/',filename]);
+%                 CC = CC_EXACT(:,:,end);
+%                 CA = [min(CC(:)) max(CC(:))];
+%                 subplot 221
+%                 imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 subplot 222
+%                 imagesc(CC_HARP(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 subplot 223
+%                 imagesc(CC_SinMod(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 subplot 224
+%                 imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 set(gcf,'position',[680 558 1120 840])
 
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
@@ -490,7 +496,19 @@ if RUN_ERROR
             % Debug
             fprintf('\n Estimating error metrics in data %d, tag spacing %d',d-1,f-1)
             
-            %% Errors estimation                   
+            %% Errors estimation
+            % Load data
+            if SinMod_ERROR
+                load(['outputs/noise_free/SinMod/',filename]);
+            end
+            if HARP_ERROR
+                load(['outputs/noise_free/HARP/',filename]);
+            end
+            if HARPI_ERROR
+                  load([harpi_output,filename]);    
+            end
+
+            
             % Reference mask
             m = mask_exact; 
             N = sum(m(:));           
@@ -505,7 +523,6 @@ if RUN_ERROR
                 
                 % HARP errors
                 if HARP_ERROR
-                    load(['outputs/noise_free/HARP/',filename]);
                     dx_harp = dxh(:,:,l);  % x-displacement
                     dy_harp = dyh(:,:,l);  % y-displacement
                     CC_HARP_ = CC_HARP(:,:,l);  % CC strain component
@@ -522,7 +539,6 @@ if RUN_ERROR
 
               % SinMod errors
               if SinMod_ERROR
-                  load(['outputs/noise_free/SinMod/',filename]);
                   dx_sinmod = dxs(:,:,l);  % x-displacement
                   dy_sinmod = dys(:,:,l);  % y-displacement
                   CC_SinMod_ = CC_SinMod(:,:,l);  % CC strain component
@@ -539,7 +555,6 @@ if RUN_ERROR
 
               % HARPI errors
               if HARPI_ERROR
-                  load([harpi_output,filename]);    
                   dx_harpi = dxi(:,:,l);  % x-displacement
                   dy_harpi = dyi(:,:,l);  % y-displacement
                   CC_HARPI_ = CC_HARPI(:,:,l);  % CC strain component

@@ -62,7 +62,7 @@ KSpaceFollowing = false;
 %% IMAGING PARAMETERS
 % Resolutions
 pxsz = [0.001,0.001];
-FOV  = [0.1 0.1];
+FOV  = [0.2 0.2];
 resolution = FOV./pxsz;
 
 % Encoding frequencies
@@ -70,31 +70,25 @@ tag_spac = [2.9*pxsz(1) 5.8*pxsz(1) 8*pxsz(1) 11.6*pxsz(1)]; % [m]
 ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
 
 %% HARPI INTERPOLATION SPECS
-% HARPI options
+% % Current working setup (Transmission)
 % undersamplingfac = 1;                   % undersampling factor
 % avgundersampling = false;               % average undersampling 
-% interpolation    = 'MultiquadricO3RBF';   % interpolation scheme ('gridfit'/'tpaps')
-% RBFFactors       = 0.2*ke_spamm;%0.2*ke_spamm;%0.05*ke_spamm
-% smoothingfac     = 1e-4;
-
-% % Current working setup (Butterworth)
-% undersamplingfac = 1;                   % undersampling factor
-% avgundersampling = false;               % average undersampling 
-% interpolation    = 'MultiquadricO3RBF'; % interpolation scheme ('gridfit'/'tpaps')
-% RBFFactors       = 0.05*ke_spamm;       %0.2*ke_spamm;%0.05*ke_spamm
-% smoothingfac     = 1e-01*(ke_spamm/ke_spamm(2));
+% interpolation    = 'Multiquadric3';     % interpolation scheme ('gridfit'/'tpaps')
+% RBFFactors       = 0.05*ke_spamm;
+% smoothingfac     = 1e-10*[1 1 1 1];      % (A + I*s*norm(A,2))*w = g
 
 % Current working setup (Transmission)
-alpha = (ke_spamm/ke_spamm(1)).^1;
 undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
-interpolation    = 'MultiquadricO3RBF'; % interpolation scheme ('gridfit'/'tpaps')
-RBFFactors       = 0.05*ke_spamm(1)*alpha;
-smoothingfac     = 1.0e-02*alpha;
+interpolation    = 'Multiquadric3';     % interpolation scheme ('gridfit'/'tpaps')
+RBFFactors       = 0.025*ke_spamm;
+smoothingfac     = 1e-8*[1e-01 0.5e-01 1e-02 0.5e-02];      % (A + I*s*norm(A,2))*w = g
 
-figure(1)
-plot(ke_spamm,0.05*ke_spamm(1)*alpha,'s-')
-pause
+% figure(1)
+% pixels_per_wl = tag_spac/pxsz(1);
+% plot(pixels_per_wl,0.05*ke_spamm(1)*alpha,'s-','linewidth',2)
+% xlabel("Pixels per wavelength",'interpreter','latex')
+% ylabel("$a$ (Eq. 11)",'interpreter','latex')
 
 % HARPI output folder
 if avgundersampling
@@ -188,7 +182,7 @@ if RUN_EXACT
             I = Ir + Ii;
 
             % Squeeze images
-            range = 1:100;
+            range = 1:200;
             I = squeeze(I(range,range,1,:,:));
             M = squeeze(M(range,range,1,1,:));
 
@@ -244,12 +238,12 @@ if RUN_EXACT
             RR_EXACT(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.RR(:);
             CC_EXACT(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.CC(:);
 
-            % figure(1)
-            % subplot 121;
-            % imagesc(CC_EXACT(:,:,end)); colorbar; %caxis([-0.2 0.2])
-            % subplot 122;
-            % imagesc(RR_EXACT(:,:,end)); colorbar; %caxis([-0.2 0.2])
-            % pause(0.1)
+%             figure(1)
+%             subplot 121;
+%             imagesc(CC_EXACT(:,:,end)); colorbar; %caxis([-0.2 0.2])
+%             subplot 122;
+%             imagesc(RR_EXACT(:,:,end)); colorbar; %caxis([-0.2 0.2])
+%             pause(0.1)
             
             % Write exact displacement and strain
             mask_exact = st.maskimage(:,:,1);
@@ -262,7 +256,7 @@ end
 %% SinMod AND HARP ANALYSIS
 if RUN_TAGGING
 
-    for f=[2 4]%[1 2 4]%1:nos
+    for f=[1 2 3 4]%[1 2 4]%1:nos
 
         % SPAMM encoding frequency
         ke = [ke_spamm(f) ke_spamm(f)];
@@ -282,7 +276,7 @@ if RUN_TAGGING
             I = Ir + Ii;
             
             % Squeeze data
-            range = 1:100;
+            range = 1:200;
             I = squeeze(I(range,range,1,:,:));
             M = squeeze(M(range,range,1,1,:));
 
@@ -434,10 +428,10 @@ if RUN_TAGGING
                 args = struct(...
                         'Mask',             M,...
                         'ke',               ke,...
-                        'FOV',              [0.1 0.1],...
+                        'FOV',              [0.2 0.2],...
                         'PixelSize',        pxsz,...
-                        'SearchWindow',     [0,0],...
-                        'PhaseWindow',      [2,2],...
+                        'SearchWindow',     [3,3],...
+                        'PhaseWindow',      [3,3],...
                         'Frames',           1:Nfr,...
                         'theta',            deg2rad([0 90]),...
                         'show',             false,...
@@ -485,13 +479,20 @@ if RUN_TAGGING
 
                 figure(1)
                 load(['outputs/noisy/Exact/',filename]);
+                load(['outputs/noisy/HARP/',filename]);
+                load(['outputs/noisy/SinMod/',filename]);
                 CC = CC_EXACT(:,:,end);
                 CA = [min(CC(:)) max(CC(:))];
-                subplot 121
+                subplot 221
                 imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
-                subplot 122
+                subplot 222
+                imagesc(CC_HARP(:,:,end)); colorbar; colormap(jet); caxis(CA)
+                subplot 223
+                imagesc(CC_SinMod(:,:,end)); colorbar; colormap(jet); caxis(CA)
+                subplot 224
                 imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
-
+                set(gcf,'position',[0 0 920 640])
+                
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
                 save([harpi_output,filename],...
@@ -505,7 +506,7 @@ end
 
 %% ERROR ANALYSIS
 if RUN_ERROR
-    for f=[1 2 4]%1:nos         % spacing
+    for f=[1 2 3 4]%1:nos         % spacing
         
         % Mean values
         mean_h = zeros([nod Nfr]);
@@ -530,6 +531,17 @@ if RUN_ERROR
             fprintf('\n Estimating error metrics in data %d, tag spacing %d',d-1,f-1)
             
             %% Errors estimation                   
+            % Load data
+            if SinMod_ERROR
+                load(['outputs/noisy/SinMod/',filename]);
+            end
+            if HARP_ERROR
+                load(['outputs/noisy/HARP/',filename]);
+            end
+            if HARPI_ERROR
+                  load([harpi_output,filename]);
+            end
+            
             % Reference mask
             m = mask_exact; 
             N = sum(m(:));           
@@ -550,7 +562,6 @@ if RUN_ERROR
                 
                 % HARP errors
                 if HARP_ERROR
-                    load(['outputs/noisy/HARP/',filename]);
                     dx_harp = dxh(:,:,l);  % x-displacement
                     dy_harp = dyh(:,:,l);  % y-displacement
                     CC_HARP_ = CC_HARP(:,:,l);  % CC strain component
@@ -572,7 +583,6 @@ if RUN_ERROR
 
               % SinMod errors
               if SinMod_ERROR
-                  load(['outputs/noisy/SinMod/',filename]);
                   dx_sinmod = dxs(:,:,l);  % x-displacement
                   dy_sinmod = dys(:,:,l);  % y-displacement
                   CC_SinMod_ = CC_SinMod(:,:,l);  % CC strain component
@@ -594,7 +604,6 @@ if RUN_ERROR
 
               % HARPI errors
               if HARPI_ERROR
-                  load([harpi_output,filename]);    
                   dx_harpi = dxi(:,:,l);  % x-displacement
                   dy_harpi = dyi(:,:,l);  % y-displacement
                   CC_HARPI_ = CC_HARPI(:,:,l);  % CC strain component
@@ -613,48 +622,49 @@ if RUN_ERROR
                   mean_values.RR_HARPI(d,f,l) = mean(RR_HARPI_(m));
                   mean_values.CC_HARPI(d,f,l) = mean(CC_HARPI_(m));
                   
-                  if l==6 && f==2
-                      r = 10:90;
-                      figure('visible','off')
+                  if l==6 && f==3 && d==8
+                      r = 61:140;
                       CA = [min(CC_EXACT_(:)) max(CC_EXACT_(:))];
+
+                      figure('visible','off')
                       imagesc(CC_EXACT_(r,r),'alphadata',m(r,r));
                       cb = colorbar;
                       cb.Label.Interpreter = 'latex';
                       caxis(CA)
-                      colormap(jet)
+                      colormap(flipud(jet))
                       axis off square
-                      % print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
-                      print('-dpng','-r600', sprintf('%01d_CC_EXACT',d));
+                      print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_EXACT',d));
 
                       figure('visible','off')
                       imagesc(CC_HARP_(r,r),'alphadata',m(r,r));
                       cb = colorbar;
                       cb.Label.Interpreter = 'latex';
                       caxis(CA)
-                      colormap(jet)
+                      colormap(flipud(jet))
                       axis off square  
-                      % print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
-                      print('-dpng','-r600', sprintf('%01d_CC_HARP',d));
+                      print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_HARP',d));
                       
                       figure('visible','off')
                       imagesc(CC_SinMod_(r,r),'alphadata',m(r,r));
                       cb = colorbar;
                       cb.Label.Interpreter = 'latex';
                       caxis(CA)
-                      colormap(jet)
+                      colormap(flipud(jet))
                       axis off square
-                      % print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
-                      print('-dpng','-r600', sprintf('%01d_CC_SinMod',d));
+                      print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_SinMod',d));
 
                       figure('visible','off')
                       imagesc(CC_HARPI_(r,r),'alphadata',m(r,r)); 
                       cb = colorbar;
                       cb.Label.Interpreter = 'latex';
                       caxis(CA)
-                      colormap(jet)
+                      colormap(flipud(jet))
                       axis off square                      
-                      % print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
-                      print('-dpng','-r600', sprintf('%01d_CC_HARPI',d));
+                      print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_HARPI',d));
                   end
                   
               end
@@ -687,7 +697,7 @@ end
 
 
 %% plots
-spa = 2;
+spa = 3;
 figure,
 subplot 221
 errorbar(mean_HARP_mag(spa,2:end),std_HARP_mag(spa,2:end),'LineWidth',2); hold on
