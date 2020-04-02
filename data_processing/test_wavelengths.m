@@ -31,9 +31,9 @@ end
 %% INPUT DATA
 % Analysis to be performed
 RUN_EXACT   = false;
-RUN_SinMod  = false;
-RUN_HARP    = false;
-RUN_HARPI   = false;
+RUN_SinMod  = true;
+RUN_HARP    = true;
+RUN_HARPI   = true;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
 RUN_ERROR   = true;
 
@@ -73,18 +73,8 @@ ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
 undersamplingfac = 1;                 % undersampling factor
 avgundersampling = false;             % average undersampling 
 interpolation = 'Multiquadric3';  % interpolation scheme
-RBFFactors    = 0.01*ke_spamm;
-smoothingfac  = 1e-16;
-
-% % % When using Wendland RBF, good chooses
-% % % of RBF and smoothing factors are
-% % %   A: (0.2*ke,1e-5)
-% % %   B: (0.2*ke,1e-4)
-% % %   C: (0.15*ke,1e-5)
-% % %   D: (0.15*ke,1e-04)
-% % interpolation = 'WendlandRBF';   % interpolation scheme ('gridfit'/'tpaps')
-% % RBFFactors    = 0.12*ke_spamm;%0.12*ke_spamm;%0.0460*ke_spamm;
-% % smoothingfac  = 1e-4;
+RBFFactors    = 0.025*ke_spamm;
+smoothingfac  = 1e-12;
 
 % HARPI output folder
 if avgundersampling
@@ -222,7 +212,7 @@ end
 %% SinMod AND HARP ANALYSIS
 if RUN_TAGGING
 
-    for f=1:nos
+    for f=[1 2 4]%1:nos
 
         % SPAMM encoding frequency
         ke = [ke_spamm(f) ke_spamm(f)];
@@ -388,8 +378,8 @@ if RUN_TAGGING
                 % Seed points
                 seeds_mask = bwmorph(M(:,:,1),'skel',Inf);
                 [X,Y] = meshgrid(1:Isz(2),1:Isz(1));
-                xi = X(seeds_mask); xi = xi(1:3:end);
-                yi = Y(seeds_mask); yi = yi(1:3:end);
+                xi = X(seeds_mask); xi = xi(1:5:end);
+                yi = Y(seeds_mask); yi = yi(1:5:end);
 
                 args = struct(...
                         'Mask',             M,...
@@ -450,14 +440,18 @@ if RUN_TAGGING
 %                 CC = CC_EXACT(:,:,end);
 %                 CA = [min(CC(:)) max(CC(:))];
 %                 subplot 221
-%                 imagesc(CC_EXACT(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 imagesc(CC_EXACT(:,:,end),'AlphaData',st.maskimage)
+%                 colorbar; colormap(flipud(jet)); caxis(CA)
 %                 subplot 222
-%                 imagesc(CC_HARP(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 imagesc(CC_HARP(:,:,end),'AlphaData',st.maskimage);
+%                 colorbar; colormap(flipud(jet)); caxis(CA)
 %                 subplot 223
-%                 imagesc(CC_SinMod(:,:,end)); colorbar; colormap(jet); caxis(CA)
+%                 imagesc(CC_SinMod(:,:,end),'AlphaData',st.maskimage);
+%                 colorbar; colormap(flipud(jet)); caxis(CA)
 %                 subplot 224
-%                 imagesc(CC_HARPI(:,:,end)); colorbar; colormap(jet); caxis(CA)
-%                 set(gcf,'position',[680 558 1120 840])
+%                 imagesc(CC_HARPI(:,:,end),'AlphaData',st.maskimage);
+%                 colorbar; colormap(flipud(jet)); caxis(CA)
+%                 set(gcf,'position',[0 0 920 640])
 
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
@@ -472,7 +466,7 @@ end
 
 %% ERROR ANALYSIS
 if RUN_ERROR
-    for f=1:nos         % spacing
+    for f=[1 2 4]%1:nos         % spacing
         
         % Mean values
         mean_h = zeros([nod Nfr]);
@@ -567,14 +561,50 @@ if RUN_ERROR
                   nRMSE_CC.HARPI(d,f,l)  = 1/(max(abs(CC_EXACT_(m)))*sqrt(N))*sqrt(sum((CC_HARPI_(m) - CC_EXACT_(m)).^2));
                   nRMSE_RR.HARPI(d,f,l)  = 1/(max(abs(RR_EXACT_(m)))*sqrt(N))*sqrt(sum((RR_HARPI_(m) - RR_EXACT_(m)).^2));
                   
-                  % if l==6
-                  %     figure(1)
-                  %     subplot 121;
-                  %     imagesc(CC_EXACT_); colorbar; caxis([min(CC_EXACT_(:)) max(CC_EXACT_(:))])
-                  %     subplot 122;
-                  %     imagesc(CC_HARPI_); colorbar; caxis([min(CC_EXACT_(:)) max(CC_EXACT_(:))])
-                  %     pause(0.1)
-                  % end
+                  if l==6 && f==2 && d==4
+                      r = 61:140;
+                      CA = [min(CC_EXACT_(:)) max(CC_EXACT_(:))];
+
+                      figure('visible','off')
+                      imagesc(CC_EXACT_(r,r),'alphadata',m(r,r));
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
+                      colormap(flipud(jet))
+                      axis off square
+                      print('-depsc','-r600', sprintf('%01d_CC_EXACT',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_EXACT',d));
+
+                      figure('visible','off')
+                      imagesc(CC_HARP_(r,r),'alphadata',m(r,r));
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
+                      colormap(flipud(jet))
+                      axis off square  
+                      print('-depsc','-r600', sprintf('%01d_CC_HARP',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_HARP',d));
+                      
+                      figure('visible','off')
+                      imagesc(CC_SinMod_(r,r),'alphadata',m(r,r));
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
+                      colormap(flipud(jet))
+                      axis off square
+                      print('-depsc','-r600', sprintf('%01d_CC_SinMod',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_SinMod',d));
+
+                      figure('visible','off')
+                      imagesc(CC_HARPI_(r,r),'alphadata',m(r,r)); 
+                      cb = colorbar;
+                      cb.Label.Interpreter = 'latex';
+                      caxis(CA)
+                      colormap(flipud(jet))
+                      axis off square                      
+                      print('-depsc','-r600', sprintf('%01d_CC_HARPI',d));
+%                       print('-dpng','-r600', sprintf('%01d_CC_HARPI',d));
+                  end
                   
               end
                 

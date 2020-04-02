@@ -8,7 +8,7 @@ undersamplingfac = 1;                   % undersampling factor
 avgundersampling = false;               % average undersampling 
 interpolation    = 'Multiquadric3'; % interpolation scheme ('gridfit'/'tpaps')
 
-% Output folder
+% Output foldercasa
 harpi_output = 'outputs/noise_free/HARPI/';
 if avgundersampling
     harpi_output = [harpi_output,sprintf('%s/avg/%dX/',interpolation,undersamplingfac)];
@@ -35,8 +35,8 @@ load([harpi_output,'workspace.mat'],...
          'nRMSE','nRMSE_CC')
 
 % Colors
-% co = linspecer(3);
-co = distinguishable_colors(3,'w');
+co = linspecer(3);
+% co = distinguishable_colors(3,'w');
 
 % Plot settings
 api = struct(...
@@ -68,7 +68,7 @@ labels = [true,false,false,false];
 WL = [3,6,8,12];
 
 % Plot error for each tag frequency
-for f=1:4
+for f=[2]%[1 2 4]
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -88,7 +88,7 @@ for f=1:4
     nice_plot(api);
 
     % Get current axis and figure
-    if f == 1
+    if f == 2
         ref_ax = gca;
         ref_fig = gcf;
         fig_pos = get(ref_fig,'position');
@@ -204,7 +204,7 @@ for f=1:4
     api.XLabel = true;
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE RR (\%)';
-    api.Axis = [0.5 5.5 0 100];
+    api.Axis = [0.5 5.5 0 70];
     api.YAxisTickValues = 0:20:90;
     nice_plot(api);
 
@@ -217,50 +217,53 @@ for f=1:4
     print('-depsc','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))]);
     print('-dpng','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))])
 
-    % Print mean errors
-    fprintf('\n\n Average errors and stds across displacements:')
-    fprintf('\n  nRMSE and DE means:')
-    a = mean_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
-    a = mean_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
-    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
-    a = mean_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
-
-    fprintf('\n  nRMSE and DE stds:')
-    a = std_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
-    a = std_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_SinMod_ang([2],2:end); mub = mean(a); stdevb = std(b);
-    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f°',mu,stdev,mub,stdevb)
-    a = std_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f°\n',mu,stdev,mub,stdevb)
-
-    fprintf('\n  CC and RR means:')
-    a = mean_HARP_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_HARP_RR([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
-    a = mean_SinMod_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_SinMod_RR([2],2:end); mub = mean(a); stdevb = std(b);
-    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
-    a = mean_HARPI_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = mean_HARPI_RR([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
-
-    fprintf('\n  CC and RR stds:')
-    a = std_HARP_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_HARP_RR([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARP:   %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
-    a = std_SinMod_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_SinMod_RR([2],2:end); mub = mean(a); stdevb = std(b);
-    fprintf('\n     SinMod: %.1f pm %.1f%% and %.1f pm %.1f%%',mu,stdev,mub,stdevb)
-    a = std_HARPI_CC([2],2:end); mu = mean(a); stdev = std(a);
-    b = std_HARPI_RR([2],2:end); mub = mean(b); stdevb = std(b);
-    fprintf('\n     HARPI:  %.1f pm %.1f%% and %.1f pm %.1f%%\n',mu,stdev,mub,stdevb)
 
 end
+
+
+%% PRINT AVERAGES
+% Print mean errors
+fprintf('\n\n Average errors and stds across displacements:')
+fprintf('\n  nRMSE and DE means:')
+a = mean_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
+b = mean_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARP:   %.2f pm %.2f%% and %.2f pm %.2f°',mu,stdev,mub,stdevb)
+a = mean_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
+b = mean_SinMod_ang([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     SinMod: %.2f pm %.2f%% and %.2f pm %.2f°',mu,stdev,mub,stdevb)
+a = mean_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
+b = mean_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARPI:  %.2f pm %.2f%% and %.2f pm %.2f°',mu,stdev,mub,stdevb)
+
+fprintf('\n  nRMSE and DE stds:')
+a = std_HARP_mag([2],2:end); mu = mean(a); stdev = std(a);
+b = std_HARP_ang([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARP:   %.2f pm %.2f%% and %.2f pm %.2f°',mu,stdev,mub,stdevb)
+a = std_SinMod_mag([2],2:end); mu = mean(a); stdev = std(a);
+b = std_SinMod_ang([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     SinMod: %.2f pm %.2f%% and %.2f pm %.2f°',mu,stdev,mub,stdevb)
+a = std_HARPI_mag([2],2:end); mu = mean(a); stdev = std(a);
+b = std_HARPI_ang([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARPI:  %.2f pm %.2f%% and %.2f pm %.2f°\n',mu,stdev,mub,stdevb)
+
+fprintf('\n  CC and RR means:')
+a = mean_HARP_CC([2],2:end); mu = mean(a); stdev = std(a);
+b = mean_HARP_RR([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARP:   %.2f pm %.2f%% and %.2f pm %.2f%%',mu,stdev,mub,stdevb)
+a = mean_SinMod_CC([2],2:end); mu = mean(a); stdev = std(a);
+b = mean_SinMod_RR([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     SinMod: %.2f pm %.2f%% and %.2f pm %.2f%%',mu,stdev,mub,stdevb)
+a = mean_HARPI_CC([2],2:end); mu = mean(a); stdev = std(a);
+b = mean_HARPI_RR([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARPI:  %.2f pm %.2f%% and %.2f pm %.2f%%',mu,stdev,mub,stdevb)
+
+fprintf('\n  CC and RR stds:')
+a = std_HARP_CC([2],2:end); mu = mean(a); stdev = std(a);
+b = std_HARP_RR([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARP:   %.2f pm %.2f%% and %.2f pm %.2f%%',mu,stdev,mub,stdevb)
+a = std_SinMod_CC([2],2:end); mu = mean(a); stdev = std(a);
+b = std_SinMod_RR([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     SinMod: %.2f pm %.2f%% and %.2f pm %.2f%%',mu,stdev,mub,stdevb)
+a = std_HARPI_CC([2],2:end); mu = mean(a); stdev = std(a);
+b = std_HARPI_RR([2],2:end); mub = mean(b); stdevb = std(b);
+fprintf('\n     HARPI:  %.2f pm %.2f%% and %.2f pm %.2f%%\n',mu,stdev,mub,stdevb)
