@@ -27,7 +27,7 @@ def generate_phantoms(nb_samples,ini=0,fin=0):
 
 
 # SINE images generation
-def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=False):
+def generate_sine(resolutions, frequencies, patients, ini=0, fin=0):
 
     # Create folder
     if not os.path.isdir('inputs/kspaces'):
@@ -97,16 +97,15 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 kspace, mask = I.generate(artifact, phantom, param, debug=False)
 
                 # Export noise-free images
-                if noise_free:
-                    # Create folder
-                    if not os.path.isdir('inputs/noise_free_images'):
-                        os.mkdir('inputs/noise_free_images')
+                # Create folder
+                if not os.path.isdir('inputs/noise_free_images'):
+                    os.mkdir('inputs/noise_free_images')
 
-                    # Get images and scale
-                    sine_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True)
+                # Get images and scale
+                sine_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True)
 
-                    # Export images
-                    save_pyobject(sine_image,'inputs/noise_free_images/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
+                # Export images
+                save_pyobject(sine_image,'inputs/noise_free_images/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
 
                 # # Debug plotting
                 # Id = kspace.to_img()
@@ -130,7 +129,7 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0, noise_free=F
                 save_pyobject(maskim,'inputs/masks/I_d{:02d}_f{:01d}_r{:01d}.pkl'.format(d,fn,rn))
 
 # Reference images generation
-def generate_reference(resolutions, frequencies, patients, ini=0, fin=0, noise_free=False, RBF=False):
+def generate_reference(resolutions, frequencies, patients, ini=0, fin=0):
 
     # Create folder
     if not os.path.isdir('inputs/masks'):
