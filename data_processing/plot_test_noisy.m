@@ -84,7 +84,7 @@ for f=[2]%1:4
     api.XLabel = false;
     api.YLabel = true;
     api.YLabelStr = 'nRMSE (\%)';
-    api.Axis = [0.5 5.5 3 12];
+    api.Axis = [0.5 5.5 0 12];
     api.YAxisTickValues = 0:3:15;
     nice_plot(api);
 
@@ -135,7 +135,7 @@ for f=[2]%1:4
     api.XLabel = true;
     api.YLabel = true;
     api.YLabelStr = 'DE ($^o$)';
-    api.Axis = [0.5 5.5 1.0 4.5];
+    api.Axis = [0.5 5.5 0 4.5];
     api.YAxisTickValues = 0:1:6;
     nice_plot(api);
 
@@ -216,7 +216,7 @@ for f=[2]%1:4
     api.XLabel = true;
     api.YLabel = true;
     api.YLabelStr = 'nRMSE RR (\%)';
-    api.Axis = [0.5 5.5 10 50];
+    api.Axis = [0.5 5.5 0 50];
     api.YAxisTickValues = 0:10:100;
     nice_plot(api);
 
