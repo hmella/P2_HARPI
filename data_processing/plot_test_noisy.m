@@ -2,6 +2,7 @@ clear; close all; clc;
 
 % Add functions path
 addpath('utils/')
+addpath(genpath('/home/hernan/Git/matlab_tools/'))
 
 % HARPI options
 undersamplingfac = 1;                   % undersampling factor
