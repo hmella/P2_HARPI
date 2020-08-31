@@ -82,7 +82,7 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0):
                 param.xi = 0.5
                 param.sigma = 1.0
                 param.phi_en = theta         # endocardial torsion
-                param.phi_ep = 0*np.pi/180   # epicardial torsion
+                param.phi_ep = 0.5*theta   # epicardial torsion
                 param.S_ar = 1.0             # end-systolic area scaling
                 param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)        
 

@@ -30,12 +30,12 @@ end
    
 %% INPUT DATA
 % Analysis to be performed
-RUN_EXACT   = false;
+RUN_EXACT   = true;
 RUN_SinMod  = true;
 RUN_HARP    = true;
 RUN_HARPI   = true;
 RUN_TAGGING = RUN_SinMod || RUN_HARP || RUN_HARPI;
-RUN_ERROR   = true;
+RUN_ERROR   = false;
 
 % Errors to be estimated
 SinMod_ERROR = true;
@@ -46,17 +46,6 @@ HARPI_ERROR = true;
 fr  = 1:6;
 Nfr = numel(fr);
 
-%% FILTERS SPECS (for image processing)
-% Filter specs
-KSpaceFilter = 'Transmission';
-BTW_cutoff = [1 1 1 1];
-BTW_order  = [];
-KSpaceFollowing = false;
-
-% KSpaceFilter = 'Butterworth';
-% BTW_cutoff = [12, 10, 9, 7];
-% BTW_order  = 10;
-% KSpaceFollowing = false;
 
 %% IMAGING PARAMETERS
 % Resolutions
@@ -67,6 +56,12 @@ resolution = FOV./pxsz;
 % Encoding frequencies
 tag_spac = [2.9*pxsz(1) 5.8*pxsz(1) 8*pxsz(1) 11.6*pxsz(1)]; % [m]
 ke_spamm = 2*pi./tag_spac;                                   % [rad/m]
+
+
+%% FILTERS SPECS (for image processing)
+% Filter types
+filter_type = {'Butterworth','Transmission','Gabor'};
+
 
 %% HARPI INTERPOLATION SPECS
 % HARPI options
@@ -86,7 +81,7 @@ mkdir(harpi_output)
 
 %% MAIN CODE
 % Data to be analyzed
-data = 0:9;
+data = 0;
 bias_EXACT  = [];                                      % Corrupted exact data
 bias_SinMod = [];                                      % Corrupted C-SPAMM data
 bias_HARP   = [];                                      % Corrupted C-SPAMM data
@@ -245,7 +240,19 @@ if RUN_TAGGING
                 % imagesc(abs(I(:,:,1,i)).*abs(I(:,:,2,i))); colormap(gray)
                 % pause
             end
-
+            
+            % Harmonic images
+            H = HARPFilter(struct('Image',I,'CentralFreq',ke.*pxsz,'Direction',deg2rad([0 90]),...
+                                'SearchWindow',[2 2],'FilterType',filter_type{2},...
+                                'Gabor_lambda',2,'Butterworth_cuttoff',15,'Butterworth_order',9.5));            
+            Ih = H.filter(I);
+            figure(1)
+            subplot 121
+            imagesc(abs(itok(I(:,:,1,end)))); caxis([0 10000])
+            subplot 122
+            imagesc(abs(H.kspace_filter(:,:,1).*itok(I(:,:,1,end))))
+            pause
+            
             % Remove outer pixels
             M = removeOuterPixels(M, 1);
             
@@ -276,10 +283,7 @@ if RUN_TAGGING
                     'QualityFilterSize', 15,...
                     'Window',            false,...
                     'Frame2Frame',       true,...
-                    'KSpaceFilter',      KSpaceFilter,...
-                    'BTW_cutoff',        BTW_cutoff(f),...
-                    'BTW_order',         BTW_order,...
-                    'KSpaceFollowing',   KSpaceFollowing);
+                    'Filter',             H);
                 [us] = get_SinMod_motion(I, options);
                 dxs = squeeze(us(:,:,1,:));
                 dys = squeeze(us(:,:,2,:));
@@ -330,12 +334,8 @@ if RUN_TAGGING
                         'ShowConvergence',  false,...
                         'Seed',             'auto',...
                         'theta',            [0 pi/2],...
-                        'Connectivity',     8,...
-                        'KSpaceFilter',     KSpaceFilter,...
-                        'BTW_cutoff',       BTW_cutoff(f),...
-                        'BTW_order',        BTW_order,...
-                        'KSpaceFollowing',  KSpaceFollowing);
-                [ux_HARP, uy_HARP] = HARPTracking(I, args);
+                        'Connectivity',     8);
+                [ux_HARP, uy_HARP] = HARPTrackingOsman(Ih, args);
                 dxh = ux_HARP;    % pixels
                 dyh = uy_HARP;    % pixels
 
@@ -386,7 +386,6 @@ if RUN_TAGGING
                         'ke',               ke,...
                         'FOV',              Isz(1:2).*pxsz,...
                         'PixelSize',        pxsz,...
-                        'SearchWindow',     [3,3],...
                         'PhaseWindow',      [2,2],...
                         'Frames',           1:Nfr,...
                         'theta',            deg2rad([0 90]),...
@@ -394,7 +393,7 @@ if RUN_TAGGING
                         'ShowConvergence',  false,...
                         'tol',              1e-8,...
                         'Method',           interpolation,...
-                        'RBFFactor',        [1 1]*RBFFactors(f),...[1 1.75]*RBFFactors(f),...
+                        'RBFFactor',        [1 1]*RBFFactors(f),...
                         'RBFFacDist',       'DecreasingLinear',...
                         'SpatialSmoothing', smoothingfac,...
                         'UndersamplingFac', undersamplingfac,...
@@ -402,15 +401,11 @@ if RUN_TAGGING
                         'Seed',             'auto',...
                         'Connectivity',     8,...
                         'TrackingPoint',    [xi,yi],...
-                        'KSpaceFilter',     KSpaceFilter,...
-                        'BTW_cutoff',       BTW_cutoff(f),...
-                        'BTW_order',        BTW_order,...
-                        'KSpaceFollowing',  KSpaceFollowing,...
                         'PeakCombination',  false,...
                         'RefPhaseSmoothing',true);
-                metadata = HARPI(I, args);
-                ux_HARPI = metadata.arraydx;
-                uy_HARPI = metadata.arraydy;
+                metadata = HARPI(Ih, args);
+                ux_HARPI = metadata.Displacements(:,:,1,:);
+                uy_HARPI = metadata.Displacements(:,:,2,:);
                 dxi = ux_HARPI;%*pxsz(1);    % pixels to meters
                 dyi = uy_HARPI;%*pxsz(2);    % pixels to meters
 
@@ -433,25 +428,26 @@ if RUN_TAGGING
                 RR_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.RR(:);
                 CC_HARPI(repmat(st.maskimage(:,:,1),[1 1 Nfr])) = st.CC(:);
 
-%                 figure(1)
-%                 load(['outputs/noise_free/Exact/',filename]);
-%                 load(['outputs/noise_free/HARP/',filename]);
-%                 load(['outputs/noise_free/SinMod/',filename]);
-%                 CC = CC_EXACT(:,:,end);
-%                 CA = [min(CC(:)) max(CC(:))];
-%                 subplot 221
-%                 imagesc(CC_EXACT(:,:,end),'AlphaData',st.maskimage)
-%                 colorbar; colormap(flipud(jet)); caxis(CA)
-%                 subplot 222
-%                 imagesc(CC_HARP(:,:,end),'AlphaData',st.maskimage);
-%                 colorbar; colormap(flipud(jet)); caxis(CA)
-%                 subplot 223
-%                 imagesc(CC_SinMod(:,:,end),'AlphaData',st.maskimage);
-%                 colorbar; colormap(flipud(jet)); caxis(CA)
-%                 subplot 224
-%                 imagesc(CC_HARPI(:,:,end),'AlphaData',st.maskimage);
-%                 colorbar; colormap(flipud(jet)); caxis(CA)
-%                 set(gcf,'position',[0 0 920 640])
+                figure(1)
+                load(['outputs/noise_free/Exact/',filename]);
+                load(['outputs/noise_free/HARP/',filename]);
+                load(['outputs/noise_free/SinMod/',filename]);
+                CC = CC_EXACT(:,:,end);
+                CA = [min(CC(:)) max(CC(:))];
+                subplot 221
+                imagesc(CC_EXACT(:,:,end),'AlphaData',st.maskimage)
+                colorbar; colormap(flipud(jet)); caxis(CA)
+                subplot 222
+                imagesc(CC_HARP(:,:,end),'AlphaData',st.maskimage);
+                colorbar; colormap(flipud(jet)); caxis(CA)
+                subplot 223
+                imagesc(CC_SinMod(:,:,end),'AlphaData',st.maskimage);
+                colorbar; colormap(flipud(jet)); caxis(CA)
+                subplot 224
+                imagesc(CC_HARPI(:,:,end),'AlphaData',st.maskimage);
+                colorbar; colormap(flipud(jet)); caxis(CA)
+                set(gcf,'position',[0 0 920 640])
+                pause
 
                 % Write displacement and strain
                 mask_harpi = st.maskimage(:,:,1);
