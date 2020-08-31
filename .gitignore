@@ -4,3 +4,5 @@ utils/__pycache__
 .vscode
 *.png
 *.eps
+*.mat
+*.pkl
