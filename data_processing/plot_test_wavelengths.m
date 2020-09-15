@@ -2,6 +2,7 @@ clear; close all; clc;
 
 % Add functions path
 addpath('utils/')
+addpath('/home/hernan/git/matlab_tools/linspecer')
 
 % HARPI options
 undersamplingfac = 1;                   % undersampling factor
@@ -65,10 +66,10 @@ labels = [true,false,false,false];
 
 %% ERROR PLOTS
 % Wavelengths
-WL = [3,6,8,12];
+WL = [3,5,7];
 
 % Plot error for each tag frequency
-for f=[2]%[1 2 4]
+for f=[1 2 3]
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -83,19 +84,19 @@ for f=[2]%[1 2 4]
     api.XLabel = false;
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE (\%)';
-    api.Axis = [0.5 5.5 0 20];
-    api.YAxisTickValues = 0:5:20;
+    api.Axis = [0.5 5.5 0 15];
+    api.YAxisTickValues = 0:5:30;
     nice_plot(api);
 
     % Get current axis and figure
-    if f == 2
+    if f == 1
         ref_ax = gca;
         ref_fig = gcf;
         fig_pos = get(ref_fig,'position');
         ax_pos = get(ref_ax,'position');
-        set(gcf,'position',[fig_pos(1) fig_pos(2) fig_pos(3) fig_pos(4)])
-        dx = 0.1;
-        set(gca,'position',[ax_pos(1) ax_pos(2)+dx ax_pos(3) ax_pos(4)-0.6*dx])
+        set(gcf,'position',[fig_pos(1) fig_pos(2) fig_pos(3) 0.75*fig_pos(4)])
+        dx = 0.12;
+        set(gca,'position',[ax_pos(1) ax_pos(2)+dx ax_pos(3) 0.95*ax_pos(4)-0.6*dx])
     else
         fig_pos = get(ref_fig,'position');
         set(gcf,'position',fig_pos)
@@ -175,8 +176,8 @@ for f=[2]%[1 2 4]
     api.XLabel = false;
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE CC (\%)';
-    api.Axis = [0.5 5.5 0 15];
-    api.YAxisTickValues = 0:3:18;
+    api.Axis = [0.5 5.5 0 25];
+    api.YAxisTickValues = 0:5:25;
     nice_plot(api);
 
     % Get current axes
@@ -188,6 +189,18 @@ for f=[2]%[1 2 4]
     print('-depsc','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))]);
     print('-dpng','-r600', [figures_dir,sprintf('CC_WL_%02d',WL(f))])
 
+    % Print results
+    fprintf('\nCC results\n')
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP mean CC: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_CC(f,2:end)));
+    fprintf('HARP std CC:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_CC(f,2:end)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('SinMod mean CC: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_SinMod_CC(f,2:end)));
+    fprintf('SinMod std CC:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_CC(f,2:end)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP-I mean CC: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_CC(f,2:end)));
+    fprintf('HARP-I std CC:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_CC(f,2:end)))    
+    
 
     %% RR-COMPONENT ERROR
 
@@ -204,8 +217,8 @@ for f=[2]%[1 2 4]
     api.XLabel = true;
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE RR (\%)';
-    api.Axis = [0.5 5.5 0 70];
-    api.YAxisTickValues = 0:20:90;
+    api.Axis = [0.5 5.5 0 60];
+    api.YAxisTickValues = 0:10:50;
     nice_plot(api);
 
     % Get current axes
@@ -217,8 +230,42 @@ for f=[2]%[1 2 4]
     print('-depsc','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))]);
     print('-dpng','-r600', [figures_dir,sprintf('RR_WL_%02d',WL(f))])
 
+    % Print results
+    fprintf('\nRR results\n')
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARP_RR(f,2:end)));
+    fprintf('HARP std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARP_RR(f,2:end)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('SinMod mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_SinMod_RR(f,2:end)));
+    fprintf('SinMod std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_SinMod_RR(f,2:end)))
+    fprintf('--------------------------------------------------------\n')
+    fprintf('HARP-I mean RR: [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(mean_HARPI_RR(f,2:end)));
+    fprintf('HARP-I std RR:  [%.2e, %.2e, %.2e, %.2e, %.2e]\n',squeeze(std_HARPI_RR(f,2:end)))        
+    
+%     pause
+%     clc
 
 end
+
+
+%% PLOT AND EXPORT LEGEND
+figure('Visible',visibility)
+p1 = errorbar([1 2],[1 1],[1 1],'o',...
+        'Color',co(2,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(2,:),'LineWidth',plot_line_width); hold on        
+p2 = errorbar([1 2],[1 1],[1 1],'o',...
+        'Color',co(1,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(1,:),'LineWidth',plot_line_width); hold on
+p3 = errorbar([1 2],[1 1],[1 1],'o',...
+        'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
+
+% Legends
+l = legend('SP-HR','SinMod','HARP-I');
+l.FontSize = 17;
+l.Location = 'southoutside';
+l.NumColumns = 3;
+l.Interpreter = 'LaTeX';
+
+print('-depsc','-r1200', [figures_dir,'Legend']);
+print('-dpng','-r1200', [figures_dir,'Legend'])
 
 
 %% PRINT AVERAGES

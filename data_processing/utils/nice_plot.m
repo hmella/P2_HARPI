@@ -67,11 +67,11 @@ function nice_plot(varargin)
     ax.TickLabelInterpreter = 'latex';
     axis(api.Axis);
 
-    % Legends
-    l2 = legend('HARP','SinMod','HARP-I');
-    l2.FontSize = api.LegendFontSize;
-    l2.Location = api.LegendLocation;
-    l2.Interpreter = 'LaTeX';
+%     % Legends
+%     l2 = legend('SPHR','SinMod','HARP-I');
+%     l2.FontSize = api.LegendFontSize;
+%     l2.Location = api.LegendLocation;
+%     l2.Interpreter = 'LaTeX';
 
 end
 

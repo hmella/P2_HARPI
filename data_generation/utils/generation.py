@@ -80,11 +80,11 @@ def generate_sine(resolutions, frequencies, patients, ini=0, fin=0):
                 S_en  = (param.R_en-s)/param.R_en
                 theta = 0.5*s/param.R_en
                 param.xi = 0.5
-                param.sigma = 1.0
+                # param.sigma = 1.0
                 param.phi_en = theta         # endocardial torsion
-                param.phi_ep = 0.5*theta   # epicardial torsion
+                param.phi_ep = 0             # epicardial torsion
                 param.S_ar = 1.0             # end-systolic area scaling
-                param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)        
+                param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)              
 
                 # Create phantom
                 phantom = Phantom(spins, param, patient=patients[d],
@@ -139,7 +139,7 @@ def generate_reference(resolutions, frequencies, patients, ini=0, fin=0):
     for (rn, r) in enumerate(resolutions):
 
         # T1 decay
-        decay = 0.5
+        decay = 0.25
         T1 = -1.0/np.log(decay)
 
         # Create image
@@ -176,14 +176,11 @@ def generate_reference(resolutions, frequencies, patients, ini=0, fin=0):
                 S_en  = (param.R_en-s)/param.R_en
                 theta = 0.5*s/param.R_en
                 param.xi = 0.5
-                param.sigma = 1.0
+                # param.sigma = 1.0
                 param.phi_en = theta         # endocardial torsion
-                param.phi_ep = 0*np.pi/180   # epicardial torsion
+                param.phi_ep = 0             # epicardial torsion
                 param.S_ar = 1.0             # end-systolic area scaling
                 param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)        
-                # if d==0 or d==3:
-                #     if MPI_rank == 0:
-                #         print(d, param.__dict__)
 
                 # Create phantom
                 phantom = Phantom(spins, param, patient=patients[d],

@@ -2,7 +2,7 @@ clear; close all; clc;
 
 % Add functions path
 addpath('utils/')
-addpath(genpath('/home/hernan/Git/matlab_tools/'))
+addpath(genpath('/home/hernan/git/matlab_tools/'))
 
 % HARPI options
 undersamplingfac = 1;                   % undersampling factor
@@ -36,15 +36,15 @@ load([harpi_output,'workspace.mat'],...
          'nRMSE','nRMSE_CC')
 
 % Colors
+% co = linspecer(3);
 co = linspecer(3);
-% co = distinguishable_colors(3,'w');
 
 % Plot settings
 api = struct(...
     'AxesFontSize',  20,...
     'AxesLineWidth', 2,...
     'LegendFontSize', 17,...
-    'LegendLocation', 'northeast',...
+    'LegendLocation', 'northwest',...
     'Axis', [],...
     'XLabel', true,...
     'YLabel', true,...
@@ -67,10 +67,10 @@ labels = [true,false,false,false];
 
 %% ERROR PLOTS
 % Wavelengths
-WL = [3,6,8,12];
+WL = [3,5,7];
 
 % Plot error for each tag frequency
-for f=[2]%1:4
+for f=1:3
 
     % Plot SinMod and HARP results
     figure('Visible',visibility)
@@ -83,21 +83,21 @@ for f=[2]%1:4
 
     % Plot formatting
     api.XLabel = false;
-    api.YLabel = true;
+    api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE (\%)';
-    api.Axis = [0.5 5.5 0 12];
-    api.YAxisTickValues = 0:3:15;
+    api.Axis = [0.5 5.5 0 15];
+    api.YAxisTickValues = 0:5:30;
     nice_plot(api);
 
     % Get current axis and figure
-    if f == 2
+    if f == 1
         ref_ax = gca;
         ref_fig = gcf;
         fig_pos = get(ref_fig,'position');
         ax_pos = get(ref_ax,'position');
-        set(gcf,'position',[fig_pos(1) fig_pos(2) fig_pos(3) fig_pos(4)])
-        dx = 0.1;
-        set(gca,'position',[ax_pos(1) ax_pos(2)+dx ax_pos(3) ax_pos(4)-0.6*dx])
+        set(gcf,'position',[fig_pos(1) fig_pos(2) fig_pos(3) 0.75*fig_pos(4)])
+        dx = 0.12;
+        set(gca,'position',[ax_pos(1) ax_pos(2)+dx ax_pos(3) 0.95*ax_pos(4)-0.6*dx])
     else
         fig_pos = get(ref_fig,'position');
         set(gcf,'position',fig_pos)
@@ -134,10 +134,10 @@ for f=[2]%1:4
 
     % Plot formatting
     api.XLabel = true;
-    api.YLabel = true;
+    api.YLabel = labels(f);
     api.YLabelStr = 'DE ($^o$)';
-    api.Axis = [0.5 5.5 0 4.5];
-    api.YAxisTickValues = 0:1:6;
+    api.Axis = [0.5 5.5 0 6];
+    api.YAxisTickValues = 0:1:5;
     nice_plot(api);
 
     % Set current axes
@@ -175,10 +175,10 @@ for f=[2]%1:4
 
     % Plot formatting
     api.XLabel = false;
-    api.YLabel = true;
+    api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE CC (\%)';
-    api.Axis = [0.5 5.5 0 50];
-    api.YAxisTickValues = 0:10:150;
+    api.Axis = [0.5 5.5 0 85];
+    api.YAxisTickValues = 0:20:150;
     nice_plot(api);
 
     % Get current axes
@@ -205,7 +205,7 @@ for f=[2]%1:4
     %% RR-COMPONENT ERROR
 
     % Plot SinMod and HARP results
-    figure('Visible',visibility)
+    figure('Visible','off')
     errorbar(cp,squeeze(mean_HARP_RR(f,:)),squeeze(std_HARP_RR(f,:)),'o',...
             'Color',co(2,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(2,:),'LineWidth',plot_line_width); hold on        
     errorbar(cp-dr,squeeze(mean_SinMod_RR(f,:)),squeeze(std_SinMod_RR(f,:)),'o',...
@@ -215,10 +215,10 @@ for f=[2]%1:4
 
     % Plot formatting
     api.XLabel = true;
-    api.YLabel = true;
+    api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE RR (\%)';
-    api.Axis = [0.5 5.5 0 50];
-    api.YAxisTickValues = 0:10:100;
+    api.Axis = [0.5 5.5 0 90];
+    api.YAxisTickValues = 0:20:80;
     nice_plot(api);
 
     % Get current axes

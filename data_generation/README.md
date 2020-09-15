@@ -7,10 +7,10 @@ The code relies on the open source library [pymrstrain](www.github.com/hmella/py
 ### Testing
 To generate the data simply do:
 ```bash
-python3 test_base_generation.py --generate-parameters --sine --reference --nb-data 10 --nb-samples 100000 --noise-free --initial-data 0 --final-data 10
+python3 test_base_generation.py --generate-parameters --sine --reference --nb-samples 100000 --initial-data 0 --final-data 10
 ```
 or
 ```bash
-python3 test_base_generation.py -gp -s -r -Nd 10 -Ns 100000 -nfree -i 0 -f 10
+python3 test_base_generation.py -gp -s -r -Ns 100000 -i 0 -f 10
 ```
 For a better understanding of the bash commnads the author refers to the file ```utils/args_parser.py```
