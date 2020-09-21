@@ -9,3 +9,6 @@ cfrequencies = [np.array([2*np.pi/l,2*np.pi/l,0]) for l in tag_spacings]  # enco
 
 # Noise levels
 noise_levels = np.array([6e-02])
+
+# Inlcusion factors
+inc_factors = np.linspace(0.05,1.4,10)

@@ -250,3 +250,199 @@ def sine_noisy_images(resolutions, frequencies, noise_levels, ini=0, fin=0):
 
                     # Export noisy kspaces
                     save_pyobject(I,'inputs/noisy_images/I_d{:02d}_f{:01d}_r{:01d}_n{:01d}.pkl'.format(d,fn,rn,nn))
+
+
+####################################
+# Inclusions test
+####################################
+# SINE images generation
+def generate_inclusion_sine(resolutions, frequencies, patients, ini=0, fin=0):
+
+    # Create folder
+    if not os.path.isdir('inputs/inc_kspaces'):
+        os.makedirs('inputs/inc_kspaces',exist_ok=True)
+    if not os.path.isdir('inputs/inc_masks'):
+        os.makedirs('inputs/inc_masks',exist_ok=True)
+
+    # Resolutions loop
+    for (rn, r) in enumerate(resolutions):
+
+        # T1 decay
+        decay = 0.25
+        T1 = -1.0/np.log(decay)
+
+        # Create image
+        I = SINEImage(FOV=np.array([0.2, 0.2, 0.008]),
+                  center=np.array([0.0,0.0,0.0]),
+                  resolution=r,
+                  encoding_frequency=np.array([0,0,0]),
+                  T1=T1,
+                  kspace_factor=15,
+                  slice_thickness=0.008,
+                  oversampling_factor=1,
+                  phase_profiles=r[1])
+
+        # Filter specifications
+        I.filter = None
+        I.filter_width = 0.9
+        I.filter_lift = 0.0
+
+        # Frequencies loop
+        for (fn, f) in enumerate(frequencies):
+
+            # Set encoding frequency
+            I.encoding_frequency = f
+         
+            # Data loop
+            for d in [3]:
+
+                # Debug
+                MPI_print('[SINE] Generating freq. {:d}, data {:d}'.format(fn,d))
+
+                # Load spins and parameter objects
+                spins = load_pyobject('inputs/spins/spins_{:03d}.pkl'.format(d),sep_proc=True)
+                param = load_pyobject('inputs/parameters/p_{:03d}.pkl'.format(d))
+
+                # Modify some values
+                tag_spacing = 2.0*np.pi/f[0]
+                s = 0.5*tag_spacing
+                S_en  = (param.R_en-s)/param.R_en
+                theta = 0.5*s/param.R_en
+                param.xi = 0.5
+                # param.sigma = 1.0
+                param.phi_en = theta         # endocardial torsion
+                param.phi_ep = 0             # epicardial torsion
+                param.S_ar = 1.0             # end-systolic area scaling
+                param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)              
+
+                # Inclusion factors loop
+                for (incsn,incs) in inc_factors:      
+
+                    # Create phantom
+                    phantom = Phantom(spins, param, patient=patients[d],
+                                      z_motion=False, add_inclusion=True, inc_factor = incs)
+
+                    # Artifact
+                    artifact = None
+
+                    # Generate kspaces
+                    kspace, mask = I.generate(artifact, phantom, param, debug=False)
+
+                    # Export noise-free images
+                    # Create folder
+                    if not os.path.isdir('inputs/inc_noise_free_images'):
+                        os.mkdir('inputs/inc_noise_free_images')
+
+                    # Get images and scale
+                    sine_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True)
+
+                    # Export images
+                    save_pyobject(sine_image,'inputs/inc_noise_free_images/I_f{:02d}.pkl'.format(incsn))
+
+                    # # Debug plotting
+                    # Id = kspace.to_img()
+                    # if MPI_rank == 0:
+                    #     multi_slice_viewer(np.abs(Id[...,0,0,:])*np.abs(Id[...,0,1,:]))
+
+                    # Compress kspaces
+                    kspace.scale()
+
+                    # Get boolean mask
+                    maskim = mask.to_img()
+                    maskim = maskim > 0.25*np.abs(maskim).max()
+
+                    # # Debug plotting
+                    # Id = mask.to_img()
+                    # if MPI_rank == 0:
+                    #     multi_slice_viewer(maskim[...,0,0,:])
+
+                    # Export kspaces and mask
+                    save_pyobject(kspace,'inputs/inc_kspaces/I_f{:02d}.pkl'.format(incsn))
+                    save_pyobject(maskim,'inputs/inc_masks/I_f{:02d}.pkl'.format(incsn))
+
+
+# Reference images generation
+def generate_inclusion_reference(resolutions, frequencies, inc_factors):
+
+    # Create folder
+    if not os.path.isdir('inputs/inc_masks'):
+        os.makedirs('inputs/inc_masks',exist_ok=True)
+
+    # Resolutions loop
+    for (rn, r) in enumerate(resolutions):
+
+        # T1 decay
+        decay = 0.25
+        T1 = -1.0/np.log(decay)
+
+        # Create image
+        I = EXACTImage(FOV=np.array([0.2, 0.2, 0.008]),
+                    center=np.array([0.0,0.0,0.0]),
+                    resolution=r,
+                    encoding_frequency=np.array([100.0,100.0,0.0]),
+                    kspace_factor=15,
+                    slice_thickness=0.008,
+                    oversampling_factor=1,
+                    phase_profiles=r[1])
+
+        # Filter specifications
+        I.filter = None
+        I.filter_width = 0.9
+        I.filter_lift = 0.0
+
+        # Frequencies loop
+        for (fn, f) in enumerate(frequencies):
+
+            # Data loop
+            for d in [3]:
+
+                # Debug
+                MPI_print('[REFERENCE] Generating freq. {:d}, data {:d}'.format(fn,d))
+
+                # Load spins and parameter objects
+                spins = load_pyobject('inputs/spins/spins_{:03d}.pkl'.format(d),sep_proc=True)
+                param = load_pyobject('inputs/parameters/p_{:03d}.pkl'.format(d))
+
+                # Modify some values
+                tag_spacing = 2.0*np.pi/f[0]
+                s = 0.5*tag_spacing
+                S_en  = (param.R_en-s)/param.R_en
+                theta = 0.5*s/param.R_en
+                param.xi = 0.5
+                # param.sigma = 1.0
+                param.phi_en = theta         # endocardial torsion
+                param.phi_ep = 0             # epicardial torsion
+                param.S_ar = 1.0             # end-systolic area scaling
+                param.S_en = S_en            # end-systolic endo scaling (sacles the endocardial radius)  
+
+                # Inclusion factors loop
+                for (incsn,incs) in inc_factors:      
+
+                    # Create phantom
+                    phantom = Phantom(spins, param, patient=patients[d],
+                                      z_motion=False, add_inclusion=True, inc_factor=incs)
+
+                    # Artifact
+                    artifact = None
+
+                    # Generate kspaces
+                    kspace, mask = I.generate(artifact, phantom, param, debug=False)
+
+                    # Create folder
+                    if not os.path.isdir('inputs/inc_reference_images'):
+                        os.mkdir('inputs/inc_reference_images')
+
+                    # Get images and scale
+                    exact_image = scale_image(kspace.to_img(),mag=False,real=True,compl=True,type=np.uint32)
+
+                    # # Debug plotting
+                    # Id = kspace.to_img()
+                    # if MPI_rank == 0:
+                    #     multi_slice_viewer(maskim[...,0,0,:])
+                    #     multi_slice_viewer(maskim[...,0,0,:]*np.abs(Id[...,0,0,:]))
+                    #     multi_slice_viewer(maskim[...,0,0,:]*np.angle(Id[...,0,0,:]))
+                    #     multi_slice_viewer(np.abs(Id[...,0,0,:]))
+                    #     multi_slice_viewer(maskim[...,0,0,:])
+
+                    # Export kspaces and mask
+                    save_pyobject(exact_image,'inputs/inc_reference_images/I_f{:02d}.pkl'.format(incsn))
