@@ -133,7 +133,7 @@ for f=1:3
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
 
     % Plot formatting
-    api.XLabel = true;
+    api.XLabel = false;
     api.YLabel = labels(f);
     api.YLabelStr = 'DE ($^o$)';
     api.Axis = [0.5 5.5 0 6];

@@ -132,7 +132,7 @@ for f=[1 2 3]
             'Color',co(3,:),'MarkerSize',plot_marker_size,'MarkerFaceColor',co(3,:),'LineWidth',plot_line_width); hold off;
 
     % Plot formatting
-    api.XLabel = true;
+    api.XLabel = false;
     api.YLabel = labels(f);
     api.YLabelStr = 'DE ($^o$)';
     api.Axis = [0.5 5.5 0.0 6.0];
@@ -177,7 +177,7 @@ for f=[1 2 3]
     api.YLabel = labels(f);
     api.YLabelStr = 'nRMSE CC (\%)';
     api.Axis = [0.5 5.5 0 25];
-    api.YAxisTickValues = 0:5:25;
+    api.YAxisTickValues = 0:5:20;
     nice_plot(api);
 
     % Get current axes
